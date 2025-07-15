@@ -1,13 +1,13 @@
-// pages/dashboard.jsx
-'use client'
-import React, { useState } from 'react';
-
-// Import components
+"use client";
+import { useEffect,useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "../../store/authStore";
 import Navbar from './components/navbar';
 import CardManager from './pages/CardManager';
 import Button from './components/Button';
-
-const Dashboard = () => {
+const Page = () => {
+  const { user, loading } = useAuthStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('cards');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -111,44 +111,53 @@ const Dashboard = () => {
         return <CardManager onMobileSidebarOpen={() => setIsMobileSidebarOpen(true)} />;
     }
   };
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading]);
 
+  if (loading) return <p>Loading...</p>;
+  if (!user) return null;
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Navbar 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab}
-          isMobile={false}
-          isOpen={true}
-        />
-      </div>
-
-      {/* Mobile Sidebar */}
-      <div className="lg:hidden">
-        <Navbar 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab}
-          isMobile={true}
-          isOpen={isMobileSidebarOpen}
-          onClose={() => setIsMobileSidebarOpen(false)}
-        />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {renderContent()}
-      </div>
+  <div className="min-h-screen bg-gray-50 flex relative">
+    
+    {/* Mobile Sidebar (should be on top) */}
+    <div className="lg:hidden z-50">
+      <Navbar 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        isMobile={true}
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+      />
     </div>
+
+    {/* Overlay (below the sidebar) */}
+    {isMobileSidebarOpen && (
+      <div 
+        className="fixed inset-0 backdrop-blur-sm bg-black/20 z-40 lg:hidden"
+        onClick={() => setIsMobileSidebarOpen(false)}
+      />
+    )}
+
+    {/* Desktop Sidebar */}
+    <div className="hidden lg:block z-30">
+      <Navbar 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        isMobile={false}
+        isOpen={true}
+      />
+    </div>
+
+    {/* Main Content */}
+    <div className="flex-1 flex flex-col z-10">
+      {renderContent()}
+    </div>
+  </div>
   );
+
 };
 
-export default Dashboard;
+export default Page;

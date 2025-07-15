@@ -7,6 +7,7 @@ import {
   Settings,
   X
 } from 'lucide-react';
+import useAuthStore from '../../../store/authStore';
 
 const Navbar = ({ activeTab, onTabChange, isMobile, isOpen, onClose }) => {
   const navItems = [
@@ -16,6 +17,7 @@ const Navbar = ({ activeTab, onTabChange, isMobile, isOpen, onClose }) => {
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
+    const { user } = useAuthStore();
 
   const handleTabChange = (tabId) => {
     onTabChange(tabId);
@@ -75,12 +77,22 @@ const Navbar = ({ activeTab, onTabChange, isMobile, isOpen, onClose }) => {
       {/* User Profile Section - Fixed at Bottom */}
       <div className="flex-shrink-0 p-4 border-t border-gray-800">
         <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
-          <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-medium">AM</span>
-          </div>
+          <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
+      {user?.photoURL ? (
+        <img
+          src={user.photoURL}
+          alt="User profile"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className="h-full w-full bg-blue-600 flex items-center justify-center">
+          <span className="text-sm font-medium text-white">?</span>
+        </div>
+      )}
+    </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Alex Morgan</p>
-            <p className="text-xs text-gray-400 truncate">alex.morgan@example.com</p>
+            <p className="text-sm font-medium truncate">{user?.displayName}</p>
+            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
           </div>
         </div>
       </div>

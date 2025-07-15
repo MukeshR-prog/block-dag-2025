@@ -19,8 +19,10 @@ import MyCards from '../components/myCards';
 import SingleCardDetails from '../components/singleCardDetails';
 import SmartSuggestions from '../components/SmartSuggestions';
 import Button from '../components/Button';
+import useAuthStore from '../../../store/authStore';
 
 const CardManager = ({ onMobileSidebarOpen }) => {
+  const { user } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All Cards');
 
@@ -178,8 +180,18 @@ const CardManager = ({ onMobileSidebarOpen }) => {
             <Button variant="ghost" size="sm">
               <Bell className="h-5 w-5" />
             </Button>
-            <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-white">AM</span>
+            <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
+              {user?.photoURL ? (
+                <img
+                  src={user?.photoURL}
+                  alt="User profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-blue-600 flex items-center justify-center">
+                  <span className="text-sm font-medium text-white">?</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
