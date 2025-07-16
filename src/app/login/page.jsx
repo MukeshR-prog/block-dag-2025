@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import api from "../../lib/axios";
 import {
   signInWithPopup,
@@ -48,7 +49,6 @@ const checkAndCreateUser = async (firebaseUser) => {
       console.error("Login failed:", err);
     }
   };
-
   const logout = async () => {
     try {
       await signOut(auth);
@@ -58,7 +58,10 @@ const checkAndCreateUser = async (firebaseUser) => {
       console.error("Logout failed:", err);
     }
   };
-
+  useEffect(()=>{
+    if(user){
+    router.push("/dashboard")}
+  },[user])
   return (
     <div className="p-8">
       <h1 className="text-2xl mb-4">Login Page</h1>
