@@ -12,7 +12,7 @@ import {
   Zap,
   Gift
 } from 'lucide-react';
-
+import { useRouter } from "next/navigation";
 // Import components
 import Card from '../components/Card';
 import MyCards from '../components/myCards';
@@ -28,6 +28,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
 
   const smartSuggestions = [
     {
+      id: 1,
       icon: CreditCard,
       title: 'Chase Sapphire',
       subtitle: 'Visa •••• 4528',
@@ -38,6 +39,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
       iconColor: 'text-blue-600'
     },
     {
+      id:2,
       icon: Star,
       title: 'Starbucks Rewards',
       subtitle: 'Loyalty Card',
@@ -48,6 +50,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
       iconColor: 'text-green-600'
     },
     {
+      id:3,
       icon: CreditCard,
       title: 'Metro Card',
       subtitle: 'Transit Pass',
@@ -146,9 +149,16 @@ const CardManager = ({ onMobileSidebarOpen }) => {
     }
   ];
 
-  const handleCardClick = (cardData) => {
-    console.log('Card clicked:', cardData);
-  };
+    const router = useRouter();
+
+    const handleCardClick = (cardData) => {
+      console.log("Card clicked:", cardData);
+      router.push(`/dashboard/${cardData.id}`); // assuming cardData has an `id` field
+    };
+
+
+      
+    
 
   const handleMenuClick = (cardData) => {
     console.log('Menu clicked:', cardData);
@@ -282,7 +292,6 @@ const CardManager = ({ onMobileSidebarOpen }) => {
                 />
               ))
             }
-
             {/* Loyalty Cards */}
             {(filterType === 'All Cards' || filterType === 'Loyalty') && 
               loyaltyCards.map((card, index) => (
