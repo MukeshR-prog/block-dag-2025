@@ -59,7 +59,8 @@ const checkAndCreateUser = async (firebaseUser) => {
     }
   };
   useEffect(()=>{
-    router.push("/dashboard")
+    if(user){
+    router.push("/dashboard")}
   },[user])
   return (
     <div className="p-8">
