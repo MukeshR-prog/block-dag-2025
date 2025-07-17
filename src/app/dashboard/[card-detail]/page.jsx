@@ -1,115 +1,161 @@
-// src/app/dashboard/pages/CardDetailsPage.jsx
-"use client"
-import React, { useState } from 'react';
-import { ArrowLeft, Eye, Lock, Settings, CreditCard, DollarSign, ShoppingCart, Smartphone, Car, Coffee, Heart } from 'lucide-react';
-import CardDisplay from '../components/CardDisplay';
-import QuickActions from '../components/QuickActions';
-import UsageOverview from '../components/UsageOverView';
-import RecentTransactions from '../components/RecentTransactions';
-import SecurityPrivacy from '../components/SecurityPrivacy';
-import SmartSuggestions from '../components/SmartSuggestionsSection';
-import { useParams } from 'next/navigation';
-import { useRouter } from "next/navigation";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Coffee,
+  ShoppingCart,
+  Heart,
+  Car,
+  Smartphone,
+  DollarSign,
+  CreditCard,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import CardDisplay from "../components/CardDisplay";
+import QuickActions from "../components/QuickActions";
+import UsageOverview from "../components/UsageOverView";
+import RecentTransactions from "../components/RecentTransactions";
+import SecurityPrivacy from "../components/SecurityPrivacy";
+import SmartSuggestions from "../components/SmartSuggestionsSection";
+import api from "../../../lib/axios";
 
-
-const CardDetailsPage = ({ cardData }) => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const params = useParams();
-  const cardId = params['card-detail'];
+const CardDetailsPage = () => {
+  const [cardInfo, setCardInfo] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [transformedTransactions, setTransformedTransactions] = useState([]);
   const router = useRouter();
-  // Sample card data - in real app, this would come from props or API
-  const defaultCardData = {
-    id: '4567',
-    type: 'Chase Sapphire Preferred',
-    lastFour: '4567',
-    cardHolder: 'John Smith',
-    status: 'Active',
-    balance: '$245.78',
-    availableCredit: '$9,000.00',
-    paymentDue: 'Jul 23',
-    usageOverview: {
-      lastUsed: 'Today, 2:45 PM',
-      location: 'Starbucks Seattle',
-      thisWeek: {
-        times: 15,
-        amount: '$28.67'
-      },
-      mostUsedAt: 'Grocery Stores',
-      transactionPercentage: '43% of transactions'
-    },
-    recentTransactions: [
-      {
-        id: 1,
-        merchant: 'Starbucks',
-        date: 'Today, 2:45 PM',
-        amount: '$5.75',
-        status: 'Completed',
-        icon: Coffee,
-        color: 'text-green-600'
-      },
-      {
-        id: 2,
-        merchant: 'Amazon.com',
-        date: 'Yesterday, 10:30 PM',
-        amount: '$34.99',
-        status: 'Completed',
-        icon: ShoppingCart,
-        color: 'text-blue-600'
-      },
-      {
-        id: 3,
-        merchant: 'Chipotle',
-        date: 'Jul 14, 3:25 PM',
-        amount: '$12.48',
-        status: 'Completed',
-        icon: Heart,
-        color: 'text-red-600'
-      },
-      {
-        id: 4,
-        merchant: 'Shell Gas Station',
-        date: 'Jul 13, 7:20 AM',
-        amount: '$45.23',
-        status: 'Completed',
-        icon: Car,
-        color: 'text-yellow-600'
-      },
-      {
-        id: 5,
-        merchant: 'Netflix',
-        date: 'Jul 5, 10:00 AM',
-        amount: '$14.99',
-        status: 'Completed',
-        icon: Smartphone,
-        color: 'text-purple-600'
+  const params = useParams();
+  const cardId = params["card-detail"];
+
+  // Transform transaction data to match component expectations
+  const transformTransactionData = (rawTransactions) => {
+    return rawTransactions.map((transaction, index) => {
+      // Determine icon and color based on transaction name or category
+      const getTransactionIcon = (name, category) => {
+        const lowerName = name.toLowerCase();
+        const lowerCategory = category?.toLowerCase() || '';
+        
+        if (lowerName.includes('coffee') || lowerName.includes('starbucks') || lowerCategory.includes('restaurant')) {
+          return { icon: Coffee, color: 'text-green-600' };
+        } else if (lowerName.includes('amazon') || lowerName.includes('shop') || lowerCategory.includes('shopping')) {
+          return { icon: ShoppingCart, color: 'text-blue-600' };
+        } else if (lowerName.includes('gas') || lowerName.includes('fuel') || lowerCategory.includes('gas')) {
+          return { icon: Car, color: 'text-yellow-600' };
+        } else if (lowerName.includes('netflix') || lowerName.includes('streaming') || lowerCategory.includes('subscription')) {
+          return { icon: Smartphone, color: 'text-purple-600' };
+        } else if (lowerName.includes('restaurant') || lowerName.includes('food') || lowerCategory.includes('food')) {
+          return { icon: Heart, color: 'text-red-600' };
+        } else if (lowerName.includes('payment') || lowerName.includes('college') || lowerName.includes('tuition')) {
+          return { icon: CreditCard, color: 'text-blue-600' };
+        } else {
+          return { icon: DollarSign, color: 'text-gray-600' };
+        }
+      };
+
+      const iconInfo = getTransactionIcon(transaction.transaction_name, transaction.category);
+      
+      // Format transaction date
+      let dateText = 'Unknown';
+      if (transaction.created_at?.seconds) {
+        const transactionDate = new Date(transaction.created_at.seconds * 1000);
+        const now = new Date();
+        const diffDays = Math.floor((now - transactionDate) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) dateText = 'Today';
+        else if (diffDays === 1) dateText = 'Yesterday';
+        else if (diffDays < 7) dateText = `${diffDays} days ago`;
+        else dateText = transactionDate.toLocaleDateString();
       }
-    ],
-    smartSuggestions: [
-      {
-        id: 1,
-        type: 'restaurant',
-        title: 'You often use this card at restaurants',
-        description: 'Set as your default dining card to earn 2x points on all restaurant purchases',
-        action: 'Set as Default for Dining'
-      },
-      {
-        id: 2,
-        type: 'recurring',
-        title: 'Recurring payment detected',
-        description: 'We detected a monthly payment of $14.99 to Netflix. Would you like to set up auto-pay?',
-        action: 'Set up Automatic Payment'
-      },
-      {
-        id: 3,
-        type: 'spending',
-        title: 'Spending insights available',
-        description: 'We\'ve analyzed your spending patterns for the last 3 months.',
-        action: 'View Insights'
-      }
-    ]
+
+      return {
+        id: transaction.transaction_id || transaction.id || index,
+        merchant: transaction.transaction_name,
+        date: dateText,
+        amount: `$${Math.abs(transaction.amount).toLocaleString()}`,
+        status: transaction.status ? 'Completed' : 'Pending',
+        icon: iconInfo.icon,
+        color: iconInfo.color,
+        type: transaction.transaction_type || 'debit',
+        category: transaction.category || 'other'
+      };
+    });
   };
 
-  const cardInfo = cardData || defaultCardData;
+  useEffect(() => {
+    if (!cardId) return;
+
+    const fetchCardData = async () => {
+      try {
+        const res = await api.get(`/card-details/by-id?card_id=${cardId}`);
+        setCardInfo(res.data);
+      } catch (err) {
+        console.error("Error fetching card data:", err);
+      }
+    };
+
+    const fetchTransactions = async () => {
+      try {
+        const res = await api.get(`/transactions?card_id=${cardId}`);
+        console.log("Transactions fetched:", res.data);
+        setTransactions(res.data);
+        
+        // Transform the transactions for the component
+        const transformed = transformTransactionData(res.data);
+        setTransformedTransactions(transformed);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+      }
+    };
+
+    fetchCardData();
+    fetchTransactions();
+  }, [cardId]);
+
+  if (!cardInfo) return <div className="p-6">Loading...</div>;
+  
+  const lastUsed = cardInfo.lastUsageTime?.toDate?.() ?? null;
+  const expiryDate = cardInfo.expiryDate?.toDate?.() ?? null;
+
+  // Generate smart suggestions based on real data
+  const generateSmartSuggestions = () => {
+    const suggestions = [];
+    
+    // Transaction pattern suggestion
+    if (transactions.length > 0) {
+      const totalAmount = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      suggestions.push({
+        id: 1,
+        type: 'spending',
+        title: 'Transaction History Available',
+        description: `You have ${transactions.length} transactions totaling $${totalAmount.toLocaleString()}. Review your spending patterns.`,
+        action: 'View Spending Analysis'
+      });
+    }
+
+    // Location-based suggestion
+    if (cardInfo.location_track && cardInfo.location?.length > 0) {
+      suggestions.push({
+        id: 2,
+        type: 'location',
+        title: 'Location Services Enabled',
+        description: `Your card works in ${cardInfo.location.join(', ')}. Use it for location-based rewards!`,
+        action: 'View Nearby Offers'
+      });
+    }
+
+    // Balance suggestion
+    if (cardInfo.balance > 1000) {
+      suggestions.push({
+        id: 3,
+        type: 'investment',
+        title: 'High Balance Detected',
+        description: `Consider optimizing your balance of $${cardInfo.balance.toLocaleString()} for better returns.`,
+        action: 'Explore Options'
+      });
+    }
+
+    return suggestions.slice(0, 3);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -119,14 +165,14 @@ const CardDetailsPage = ({ cardData }) => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <button
-                onClick={()=>(router.push('/dashboard'))}
+                onClick={() => router.push("/dashboard")}
                 className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
               >
                 <ArrowLeft className="h-5 w-5 mr-1" />
                 Back to Cards
               </button>
               <h1 className="text-xl font-semibold text-gray-900">
-                {cardInfo.type}
+                {cardInfo.card_name || "Card Details"}
               </h1>
             </div>
             <div className="flex items-center space-x-2">
@@ -137,6 +183,7 @@ const CardDetailsPage = ({ cardData }) => {
           </div>
         </div>
       </div>
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -148,10 +195,22 @@ const CardDetailsPage = ({ cardData }) => {
 
           {/* Right Column - Details and Transactions */}
           <div className="lg:col-span-2 space-y-6">
-            <UsageOverview data={cardInfo.usageOverview} />
-            <RecentTransactions transactions={cardInfo.recentTransactions} />
+            <UsageOverview
+              data={{
+                lastUsed: lastUsed ? lastUsed.toLocaleString() : "N/A",
+                location: cardInfo.location?.[0] || "Unknown",
+                thisWeek: {
+                  times: cardInfo.card_usage_count || 0,
+                  amount: `$${cardInfo.balance?.toLocaleString() || '0'}`,
+                },
+                mostUsedAt: transactions.length > 0 ? "Recent Activity" : "No Activity",
+                transactionPercentage: `${transactions.length} transactions`,
+              }}
+            />
+
+            <RecentTransactions transactions={transformedTransactions} />
             <SecurityPrivacy />
-            <SmartSuggestions suggestions={cardInfo.smartSuggestions} />
+            <SmartSuggestions suggestions={generateSmartSuggestions()} />
           </div>
         </div>
       </div>
