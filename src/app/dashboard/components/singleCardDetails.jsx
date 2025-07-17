@@ -1,9 +1,11 @@
+"use client"
 // components/singleCardDetails.jsx
 import React from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import Card from './Card';
 import Button from './Button';
 import Badge from './Badge';
+import { useRouter } from 'next/navigation';
 
 const SingleCardDetails = ({ 
   name,
@@ -19,7 +21,19 @@ const SingleCardDetails = ({
   iconColor = 'text-green-600',
   onDetailsClick,
   onMenuClick
-}) => (
+}) => {
+  const router = useRouter();
+
+  const handleMakePayment = () => {
+    try {
+      router.push('/transaction');
+      console.log('Navigating to transaction page');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
+  return (
   <Card className="p-4 hover:shadow-md transition-shadow">
     <div className="flex items-start justify-between mb-3">
       <div className="flex items-center gap-3">
@@ -73,7 +87,17 @@ const SingleCardDetails = ({
     {lastUsed && (
       <p className="text-xs text-gray-500 mt-2">Last used: {lastUsed}</p>
     )}
+    
+    <div className="mt-4">
+      <button
+        onClick={handleMakePayment}
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+      >
+        Make Payment
+      </button>
+    </div>
   </Card>
-);
+  );
+};
 
 export default SingleCardDetails;

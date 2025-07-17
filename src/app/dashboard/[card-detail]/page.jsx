@@ -10,13 +10,22 @@ import SecurityPrivacy from '../components/SecurityPrivacy';
 import SmartSuggestions from '../components/SmartSuggestionsSection';
 import { useParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
-
+import Link from 'next/link';
 
 const CardDetailsPage = ({ cardData }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const params = useParams();
   const cardId = params['card-detail'];
   const router = useRouter();
+
+  const handlePaymentClick = () => {
+    try {
+      router.push('/transaction');
+      console.log('Navigating to transaction page from card details');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
   // Sample card data - in real app, this would come from props or API
   const defaultCardData = {
     id: '4567',
@@ -129,9 +138,18 @@ const CardDetailsPage = ({ cardData }) => {
                 {cardInfo.type}
               </h1>
             </div>
-            <div className="flex items-center space-x-2">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Pin to Dashboard
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/transaction"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Make Payment
+              </Link>
+              <button 
+                onClick={handlePaymentClick}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Make Payment (Alt)
               </button>
             </div>
           </div>
