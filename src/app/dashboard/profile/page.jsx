@@ -5,6 +5,7 @@ import useAuthStore from '../../../store/authStore';
 import { useRouter } from 'next/navigation';
 import axios from '../../../lib/axios';
 import { User, CreditCard, Activity, Mail, Calendar, ArrowLeft } from 'lucide-react';
+import LoadingSpinner, { CardSkeleton, TransactionSkeleton } from '../../../components/LoadingSpinner';
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuthStore();
@@ -13,6 +14,8 @@ const ProfilePage = () => {
   const [userTransactions, setUserTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [navigationLoading, setNavigationLoading] = useState(false);
+  const [loadingCardId, setLoadingCardId] = useState(null);
 
   // Check if user is authenticated
   const isAuthenticated = !!user;
@@ -86,14 +89,42 @@ const ProfilePage = () => {
     }).format(amount || 0);
   };
 
+  const handleNavigation = async (path) => {
+    setNavigationLoading(true);
+    try {
+      await router.push(path);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setNavigationLoading(false);
+      }, 500);
+    }
+  };
+
+  const handleCardNavigation = async (cardId) => {
+    setLoadingCardId(cardId);
+    try {
+      await router.push(`/dashboard/${cardId}`);
+    } catch (error) {
+      console.error('Card navigation error:', error);
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setLoadingCardId(null);
+      }, 500);
+    }
+  };
+
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        type="profile" 
+        message="Checking Authentication" 
+        subtitle="Please wait while we verify your credentials..."
+        fullScreen={true}
+      />
     );
   }
 
@@ -103,12 +134,12 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        type="profile" 
+        message="Loading Profile" 
+        subtitle="Fetching your profile information..."
+        fullScreen={true}
+      />
     );
   }
 
@@ -118,10 +149,15 @@ const ProfilePage = () => {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 cursor-pointer transition-colors duration-200 hover:bg-gray-100 px-3 py-2 rounded-md"
+            onClick={() => handleNavigation('/dashboard')}
+            disabled={navigationLoading}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 cursor-pointer transition-colors duration-200 hover:bg-gray-100 px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ArrowLeft className="h-5 w-5" />
+            {navigationLoading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+            ) : (
+              <ArrowLeft className="h-5 w-5" />
+            )}
             Back to Dashboard
           </button>
           <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
@@ -184,9 +220,13 @@ const ProfilePage = () => {
               <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">No cards found</p>
               <button
-                onClick={() => router.push('/dashboard')}
-                className="mt-2 text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200 hover:bg-blue-50 px-3 py-2 rounded-md font-medium"
+                onClick={() => handleNavigation('/dashboard')}
+                disabled={navigationLoading}
+                className="mt-2 text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200 hover:bg-blue-50 px-3 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                {navigationLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                ) : null}
                 Add your first card
               </button>
             </div>
@@ -212,9 +252,13 @@ const ProfilePage = () => {
                       Balance: {formatCurrency(card.balance)}
                     </span>
                     <button
-                      onClick={() => router.push(`/dashboard/${card.id}`)}
-                      className="text-blue-600 hover:text-blue-800 text-sm cursor-pointer transition-colors duration-200 hover:bg-blue-50 px-2 py-1 rounded-md font-medium"
+                      onClick={() => handleCardNavigation(card.id)}
+                      disabled={loadingCardId === card.id}
+                      className="text-blue-600 hover:text-blue-800 text-sm cursor-pointer transition-colors duration-200 hover:bg-blue-50 px-2 py-1 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                      {loadingCardId === card.id ? (
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                      ) : null}
                       View Details
                     </button>
                   </div>

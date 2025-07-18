@@ -17,12 +17,15 @@ import UsageOverview from "../components/UsageOverView";
 import RecentTransactions from "../components/RecentTransactions";
 import SecurityPrivacy from "../components/SecurityPrivacy";
 import SmartSuggestions from "../components/SmartSuggestionsSection";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 import api from "../../../lib/axios";
 
 const CardDetailsPage = () => {
   const [cardInfo, setCardInfo] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [transformedTransactions, setTransformedTransactions] = useState([]);
+  const [navigationLoading, setNavigationLoading] = useState(false);
+  const [pinLoading, setPinLoading] = useState(false);
   const router = useRouter();
   const params = useParams();
   const cardId = params["card-detail"];
@@ -111,7 +114,14 @@ const CardDetailsPage = () => {
     fetchTransactions();
   }, [cardId]);
 
-  if (!cardInfo) return <div className="p-6">Loading...</div>;
+  if (!cardInfo) return (
+    <LoadingSpinner 
+      type="card" 
+      message="Loading Card Details" 
+      subtitle="Please wait while we fetch your card information..."
+      fullScreen={true}
+    />
+  );
   
   const lastUsed = cardInfo.lastUsageTime?.toDate?.() ?? null;
   const expiryDate = cardInfo.expiryDate?.toDate?.() ?? null;
@@ -157,6 +167,33 @@ const CardDetailsPage = () => {
     return suggestions.slice(0, 3);
   };
 
+  const handleNavigation = async (path) => {
+    setNavigationLoading(true);
+    try {
+      await router.push(path);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    } finally {
+      setTimeout(() => {
+        setNavigationLoading(false);
+      }, 500);
+    }
+  };
+
+  const handlePinToDashboard = async () => {
+    setPinLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Add your pin to dashboard logic here
+      console.log('Pinned to dashboard');
+    } catch (error) {
+      console.error('Pin error:', error);
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -165,10 +202,15 @@ const CardDetailsPage = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <button
-                onClick={() => router.push("/dashboard")}
-                className="flex items-center text-gray-600 hover:text-gray-900 mr-4 cursor-pointer transition-colors duration-200 hover:bg-gray-100 px-2 py-1 rounded-md"
+                onClick={() => handleNavigation("/dashboard")}
+                disabled={navigationLoading}
+                className="flex items-center text-gray-600 hover:text-gray-900 mr-4 cursor-pointer transition-colors duration-200 hover:bg-gray-100 px-2 py-1 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ArrowLeft className="h-5 w-5 mr-1" />
+                {navigationLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-1"></div>
+                ) : (
+                  <ArrowLeft className="h-5 w-5 mr-1" />
+                )}
                 Back to Cards
               </button>
               <h1 className="text-xl font-semibold text-gray-900">
@@ -176,8 +218,15 @@ const CardDetailsPage = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-2">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95">
-                Pin to Dashboard
+              <button 
+                onClick={handlePinToDashboard}
+                disabled={pinLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
+              >
+                {pinLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : null}
+                {pinLoading ? 'Pinning...' : 'Pin to Dashboard'}
               </button>
             </div>
           </div>
