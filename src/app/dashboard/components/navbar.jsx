@@ -1,5 +1,5 @@
 // components/navbar.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   CreditCard, 
   TrendingUp, 
@@ -15,6 +15,11 @@ import { signOut, auth } from '../../../lib/firebase';
 
 
 const Navbar = ({ activeTab, onTabChange, isMobile, isOpen, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+  
   const navItems = [
     { id: 'cards', label: 'My Cards', icon: CreditCard },
     { id: 'transactions', label: 'Transactions', icon: TrendingUp },
@@ -22,8 +27,6 @@ const Navbar = ({ activeTab, onTabChange, isMobile, isOpen, onClose }) => {
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
-    const { user, logout: clearUser } = useAuthStore();
-    const router = useRouter();
 
 console.log("User in Navbar:", user);
   const handleTabChange = (tabId) => {
@@ -34,6 +37,7 @@ console.log("User in Navbar:", user);
     }
   };
   const handleLogout = async () => {
+    setLoading(true);
     try {
       // Show loading state (optional)
       console.log("Logging out...");
@@ -44,7 +48,7 @@ console.log("User in Navbar:", user);
       }
       
       // Clear user from store
-      clearUser();
+      logout();
       
       // Redirect to login page
       router.push('/login');
@@ -58,16 +62,29 @@ console.log("User in Navbar:", user);
     } catch (error) {
       console.error("Logout error:", error);
       // Even if Firebase signOut fails, clear the local state
-      clearUser();
+      logout();
       router.push('/login');
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     }
   };
 
-  const handleProfileClick = () => {
-    router.push('/dashboard/profile');
-    // Close mobile menu if open
-    if (isMobile && onClose) {
-      onClose();
+  const handleProfileClick = async () => {
+    setProfileLoading(true);
+    try {
+      await router.push('/dashboard/profile');
+      // Close mobile menu if open
+      if (isMobile && onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Profile navigation error:', error);
+    } finally {
+      setTimeout(() => {
+        setProfileLoading(false);
+      }, 500);
     }
   };
   // Desktop and Mobile Sidebar (same design, different positioning)
@@ -145,19 +162,29 @@ console.log("User in Navbar:", user);
         {/* Profile Button */}
         <button
           onClick={handleProfileClick}
-          className="w-full flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105"
+          disabled={profileLoading}
+          className="w-full flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          <User className="h-5 w-5 group-hover:text-white" />
+          {profileLoading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300 group-hover:border-white"></div>
+          ) : (
+            <User className="h-5 w-5 group-hover:text-white" />
+          )}
           <span className="truncate">Profile</span>
         </button>
         
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 text-gray-300 bg-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105 shadow-md hover:shadow-lg"
+          disabled={loading}
+          className="w-full flex items-center gap-3 px-3 py-2 text-gray-300 bg-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          <LogOut className="h-5 w-5 group-hover:text-white" />
-          <span className="truncate">Logout</span>
+          {loading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300 group-hover:border-white"></div>
+          ) : (
+            <LogOut className="h-5 w-5 group-hover:text-white" />
+          )}
+          <span className="truncate">{loading ? 'Logging out...' : 'Logout'}</span>
         </button>
       </div>
     </div>

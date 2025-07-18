@@ -13,7 +13,7 @@ import useAuthStore from "../../store/authStore";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { user, setUser, logout: clearUser } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState('google'); // 'google' or 'email'
@@ -95,7 +95,7 @@ export default function LoginPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      clearUser();
+      logout(); // Fixed: using correct function name from auth store
       console.log("User logged out successfully");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -277,7 +277,7 @@ export default function LoginPage() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center justify-center space-x-3 disabled:opacity-50"
+                  className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:shadow-md"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -339,7 +339,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors duration-200 p-1 rounded-md hover:bg-gray-100"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -349,7 +349,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center space-x-2 hover:shadow-md transform hover:scale-105 disabled:transform-none"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

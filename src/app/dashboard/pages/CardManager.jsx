@@ -22,6 +22,7 @@ import SmartSuggestions from '../components/SmartSuggestions';
 import Button from '../components/Button';
 import useAuthStore from '../../../store/authStore';
 import api from '../../../lib/axios';
+import { CardSkeleton } from '../../../components/LoadingSpinner';
 
 const CardManager = ({ onMobileSidebarOpen }) => {
   const { user } = useAuthStore();
@@ -414,11 +415,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
           {loading && !error && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="p-6 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="h-8 bg-gray-200 rounded w-full"></div>
-                </Card>
+                <CardSkeleton key={i} />
               ))}
             </div>
           )}

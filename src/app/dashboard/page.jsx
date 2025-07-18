@@ -5,6 +5,7 @@ import useAuthStore from "../../store/authStore";
 import Navbar from './components/navbar';
 import CardManager from './pages/CardManager';
 import Button from './components/Button';
+import LoadingSpinner from '../../components/LoadingSpinner';
 const Page = () => {
   const { user, loading } = useAuthStore();
   const router = useRouter();
@@ -34,7 +35,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Transactions content coming soon...</p>
+              <LoadingSpinner 
+                type="transactions" 
+                message="Transactions Coming Soon" 
+                subtitle="This feature is under development"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -57,7 +63,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Analytics content coming soon...</p>
+              <LoadingSpinner 
+                type="analytics" 
+                message="Analytics Coming Soon" 
+                subtitle="Advanced analytics and insights are on the way"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -80,7 +91,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Notifications content coming soon...</p>
+              <LoadingSpinner 
+                type="default" 
+                message="Notifications Coming Soon" 
+                subtitle="Stay tuned for notification features"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -103,7 +119,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Settings content coming soon...</p>
+              <LoadingSpinner 
+                type="settings" 
+                message="Settings Coming Soon" 
+                subtitle="Configuration options will be available soon"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -117,7 +138,14 @@ const Page = () => {
     }
   }, [user, loading]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <LoadingSpinner 
+      type="default" 
+      message="Loading Dashboard" 
+      subtitle="Setting up your personalized dashboard..."
+      fullScreen={true}
+    />
+  );
   if (!user) return null;
   return (
   <div className="min-h-screen bg-gray-50 flex relative">
