@@ -71,7 +71,7 @@ const CardDetailsPage = () => {
         id: transaction.transaction_id || transaction.id || index,
         merchant: transaction.transaction_name,
         date: dateText,
-        amount: `$${Math.abs(transaction.amount).toLocaleString()}`,
+        amount: `₹${Math.abs(transaction.amount).toLocaleString()}`,
         status: transaction.status ? 'Completed' : 'Pending',
         icon: iconInfo.icon,
         color: iconInfo.color,
@@ -127,7 +127,7 @@ const CardDetailsPage = () => {
         id: 1,
         type: 'spending',
         title: 'Transaction History Available',
-        description: `You have ${transactions.length} transactions totaling $${totalAmount.toLocaleString()}. Review your spending patterns.`,
+        description: `You have ${transactions.length} transactions totaling ₹${totalAmount.toLocaleString()}. Review your spending patterns.`,
         action: 'View Spending Analysis'
       });
     }
@@ -149,7 +149,7 @@ const CardDetailsPage = () => {
         id: 3,
         type: 'investment',
         title: 'High Balance Detected',
-        description: `Consider optimizing your balance of $${cardInfo.balance.toLocaleString()} for better returns.`,
+        description: `Consider optimizing your balance of ₹${cardInfo.balance.toLocaleString()} for better returns.`,
         action: 'Explore Options'
       });
     }
@@ -166,7 +166,7 @@ const CardDetailsPage = () => {
             <div className="flex items-center">
               <button
                 onClick={() => router.push("/dashboard")}
-                className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
+                className="flex items-center text-gray-600 hover:text-gray-900 mr-4 cursor-pointer transition-colors duration-200 hover:bg-gray-100 px-2 py-1 rounded-md"
               >
                 <ArrowLeft className="h-5 w-5 mr-1" />
                 Back to Cards
@@ -176,7 +176,7 @@ const CardDetailsPage = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-2">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95">
                 Pin to Dashboard
               </button>
             </div>
@@ -201,7 +201,7 @@ const CardDetailsPage = () => {
                 location: cardInfo.location?.[0] || "Unknown",
                 thisWeek: {
                   times: cardInfo.card_usage_count || 0,
-                  amount: `$${cardInfo.balance?.toLocaleString() || '0'}`,
+                  amount: `₹${cardInfo.balance?.toLocaleString() || '0'}`,
                 },
                 mostUsedAt: transactions.length > 0 ? "Recent Activity" : "No Activity",
                 transactionPercentage: `${transactions.length} transactions`,

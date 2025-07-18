@@ -11,10 +11,10 @@ const TransactionsPage = () => {
   // Dummy transaction for testing
   const testTransaction = {
     user_id: "ML51OlsMRcP9Ti2ruddkqldWbnk1",
-    card_id: "xDfvwphuzzqp2UpypvCt",
-    transaction_name: "Payment to college",
+    card_id: "gl0qbsF3Ril0GOsvtWP5",
+    transaction_name: "Payment to amazon",
     status: true,
-    amount: 100000,
+    amount: 1000,
   };
 
   const addTransaction = async () => {

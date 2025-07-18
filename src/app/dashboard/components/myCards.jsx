@@ -37,11 +37,11 @@ const MyCards = ({
     <div className="grid grid-cols-2 gap-4 mb-3">
       <div>
         <p className="text-xs text-gray-500">Balance</p>
-        <p className="font-semibold text-gray-900">${balance}</p>
+        <p className="font-semibold text-gray-900">₹{balance}</p>
       </div>
       <div>
         <p className="text-xs text-gray-500">Limit</p>
-        <p className="font-semibold text-gray-900">${limit}</p>
+        <p className="font-semibold text-gray-900">₹{limit}</p>
       </div>
     </div>
     

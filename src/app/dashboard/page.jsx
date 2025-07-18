@@ -23,7 +23,7 @@ const Page = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden"
+                  className="lg:hidden cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                   onClick={() => setIsMobileSidebarOpen(true)}
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
