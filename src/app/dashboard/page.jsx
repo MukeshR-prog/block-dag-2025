@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "../../store/authStore";
 import Navbar from './components/navbar';
 import CardManager from './pages/CardManager';
+import Transactions from './pages/Transactions';
 import Button from './components/Button';
 import LoadingSpinner from '../../components/LoadingSpinner';
 const Page = () => {
@@ -19,28 +20,23 @@ const Page = () => {
       case 'transactions':
         return (
           <div className="flex-1 flex flex-col">
-            <header className="bg-white border-b border-gray-200 p-4 lg:p-6">
+            <header className="bg-white border-b border-gray-200 p-4 lg:p-6 lg:hidden">
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  className="cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                   onClick={() => setIsMobileSidebarOpen(true)}
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </Button>
-                <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Transactions</h1>
+                <h1 className="text-xl font-bold text-gray-900">Transactions</h1>
               </div>
             </header>
-            <div className="flex-1 flex items-center justify-center p-4">
-              <LoadingSpinner 
-                type="transactions" 
-                message="Transactions Coming Soon" 
-                subtitle="This feature is under development"
-                fullScreen={false}
-              />
+            <div className="flex-1 overflow-auto">
+              <Transactions />
             </div>
           </div>
         );

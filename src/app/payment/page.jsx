@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import useAuthStore from "../../store/authStore";
 import api from "../../lib/axios";
+import { type } from "os";
 
 const TransactionsPage = () => {
   const { user } = useAuthStore();
@@ -12,9 +13,10 @@ const TransactionsPage = () => {
   const testTransaction = {
     user_id: "ML51OlsMRcP9Ti2ruddkqldWbnk1",
     card_id: "gl0qbsF3Ril0GOsvtWP5",
-    transaction_name: "Payment to amazon",
+    transaction_name: "Payment from  amazon as sended as a salary",
     status: true,
-    amount: 1000,
+    type:"credit",
+    amount: 200000,
   };
 
   const addTransaction = async () => {
