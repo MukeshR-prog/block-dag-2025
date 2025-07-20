@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "../../store/authStore";
 import Navbar from './components/navbar';
 import CardManager from './pages/CardManager';
+import Transactions from './pages/Transactions';
 import Button from './components/Button';
 import { getTokenBalance, sendToken, BDAG_TOKEN_ADDRESS } from '../../lib/ethereum';
+import LoadingSpinner from '../../components/LoadingSpinner';
 const Page = () => {
   const { user, loading } = useAuthStore();
   const router = useRouter();
@@ -62,23 +64,23 @@ const Page = () => {
       case 'transactions':
         return (
           <div className="flex-1 flex flex-col">
-            <header className="bg-white border-b border-gray-200 p-4 lg:p-6">
+            <header className="bg-white border-b border-gray-200 p-4 lg:p-6 lg:hidden">
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden"
+                  className="cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                   onClick={() => setIsMobileSidebarOpen(true)}
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </Button>
-                <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Transactions</h1>
+                <h1 className="text-xl font-bold text-gray-900">Transactions</h1>
               </div>
             </header>
-            <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Transactions content coming soon...</p>
+            <div className="flex-1 overflow-auto">
+              <Transactions />
             </div>
           </div>
         );
@@ -101,7 +103,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Analytics content coming soon...</p>
+              <LoadingSpinner 
+                type="analytics" 
+                message="Analytics Coming Soon" 
+                subtitle="Advanced analytics and insights are on the way"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -124,7 +131,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Notifications content coming soon...</p>
+              <LoadingSpinner 
+                type="default" 
+                message="Notifications Coming Soon" 
+                subtitle="Stay tuned for notification features"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -147,7 +159,12 @@ const Page = () => {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-gray-500">Settings content coming soon...</p>
+              <LoadingSpinner 
+                type="settings" 
+                message="Settings Coming Soon" 
+                subtitle="Configuration options will be available soon"
+                fullScreen={false}
+              />
             </div>
           </div>
         );
@@ -156,7 +173,14 @@ const Page = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <LoadingSpinner 
+      type="default" 
+      message="Loading Dashboard" 
+      subtitle="Setting up your personalized dashboard..."
+      fullScreen={true}
+    />
+  );
   if (!user) return null;
 
   return (

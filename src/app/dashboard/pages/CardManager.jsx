@@ -1,6 +1,6 @@
 // components/CardManager.jsx
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, 
   Bell, 
@@ -10,7 +10,8 @@ import {
   MapPin,
   Star,
   Zap,
-  Gift
+  Gift,
+  RefreshCw
 } from 'lucide-react';
 import { useRouter } from "next/navigation";
 // Import components
@@ -20,152 +21,247 @@ import SingleCardDetails from '../components/singleCardDetails';
 import SmartSuggestions from '../components/SmartSuggestions';
 import Button from '../components/Button';
 import useAuthStore from '../../../store/authStore';
+import api from '../../../lib/axios';
+import { CardSkeleton } from '../../../components/LoadingSpinner';
 
 const CardManager = ({ onMobileSidebarOpen }) => {
   const { user } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All Cards');
+  const [userCards, setUserCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
-  const smartSuggestions = [
-    {
-      id: 1,
-      icon: CreditCard,
-      title: 'Chase Sapphire',
-      subtitle: 'Visa •••• 4528',
-      badge: 'Used Today',
-      badgeVariant: 'info',
-      actionText: 'Last used: 2 hours ago',
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    },
-    {
-      id:2,
-      icon: Star,
-      title: 'Starbucks Rewards',
-      subtitle: 'Loyalty Card',
-      badge: 'Nearby',
-      badgeVariant: 'success',
-      actionText: 'Starbucks 0.2 miles away',
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-600'
-    },
-    {
-      id:3,
-      icon: CreditCard,
-      title: 'Metro Card',
-      subtitle: 'Transit Pass',
-      badge: 'Most Used',
-      badgeVariant: 'purple',
-      actionText: 'Used 24 times this month',
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-600'
-    }
-  ];
-
-  const creditCards = [
-    {
-      type: 'Visa',
-      name: 'Chase Sapphire',
-      number: '4528',
-      balance: '2,458.50',
-      limit: '10,000.00',
-      expires: '06/25',
-      icon: CreditCard,
-      bgColor: 'bg-blue-600',
-      textColor: 'text-white'
-    },
-    {
-      type: 'Mastercard',
-      name: 'Citi Premier',
-      number: '7623',
-      balance: '1,275.30',
-      limit: '8,000.00',
-      expires: '11/24',
-      icon: CreditCard,
-      bgColor: 'bg-red-600',
-      textColor: 'text-white'
-    }
-  ];
-
-  const loyaltyCards = [
-    {
-      name: 'Starbucks Rewards',
-      type: 'Loyalty Card',
-      points: '235',
-      nextReward: '15 points away',
-      lastUsed: '2 days ago',
-      icon: Star,
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
-    },
-    {
-      name: 'Metro Card',
-      type: 'Transit Pass',
-      balance: '42.75',
-      status: 'Auto-reload Enabled',
-      lastUsed: 'Today',
-      icon: CreditCard,
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600'
-    }
-  ];
-
-  const cryptoCards = [
-    {
-      name: 'Coinbase Card',
-      type: 'Crypto Visa',
-      balance: '1,245.80',
-      points: '0.025 BTC',
-      lastUsed: '5 days ago',
-      icon: Zap,
-      bgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600'
-    }
-  ];
-
-  const giftCards = [
-    {
-      name: 'Amazon Gift Card',
-      type: 'Gift Card',
-      balance: '50.00',
-      expires: 'Never',
-      lastUsed: 'Added: Jul 12, 2023',
-      icon: Gift,
-      bgColor: 'bg-yellow-50',
-      iconColor: 'text-yellow-600'
-    }
-  ];
-
-  const membershipCards = [
-    {
-      name: 'Fitness Club',
-      type: 'Membership Card',
-      status: 'Active',
-      nextReward: 'Aug 15, 2023',
-      lastUsed: '3 days ago',
-      icon: Zap,
-      bgColor: 'bg-indigo-50',
-      iconColor: 'text-indigo-600'
-    }
-  ];
-
-    const router = useRouter();
-
-    const handleCardClick = (cardData) => {
-      console.log("Card clicked:", cardData);
-      router.push(`/dashboard/${cardData.id}`); // assuming cardData has an `id` field
-    };
-
-
-      
+  // Fetch user's cards from Firestore
+  const fetchUserCards = async () => {
+    if (!user?.uid) return;
     
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/card-details?user_id=${user.uid}`);
+      setUserCards(response.data);
+    } catch (err) {
+      console.error('Error fetching cards:', err);
+      setError('Failed to load cards');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserCards();
+  }, [user?.uid]);
+
+  // Transform Firestore data to component format
+  const transformCardData = (card) => {
+    const cardType = card.card_type?.toLowerCase();
+    
+    // Determine icon and colors based on card type
+    let icon = CreditCard;
+    let bgColor = 'bg-blue-600';
+    let iconColor = 'text-blue-600';
+    let iconBg = 'bg-blue-50';
+
+    switch (cardType) {
+      case 'credit':
+        icon = CreditCard;
+        bgColor = 'bg-blue-600';
+        iconColor = 'text-blue-600';
+        iconBg = 'bg-blue-50';
+        break;
+      case 'debit':
+        icon = CreditCard;
+        bgColor = 'bg-green-600';
+        iconColor = 'text-green-600';
+        iconBg = 'bg-green-50';
+        break;
+      case 'loyalty':
+        icon = Star;
+        bgColor = 'bg-purple-600';
+        iconColor = 'text-purple-600';
+        iconBg = 'bg-purple-50';
+        break;
+      case 'gift':
+        icon = Gift;
+        bgColor = 'bg-yellow-600';
+        iconColor = 'text-yellow-600';
+        iconBg = 'bg-yellow-50';
+        break;
+      default:
+        icon = CreditCard;
+        bgColor = 'bg-gray-600';
+        iconColor = 'text-gray-600';
+        iconBg = 'bg-gray-50';
+    }
+
+    return {
+      id: card.card_id,
+      icon,
+      bgColor,
+      iconColor,
+      iconBg,
+      textColor: 'text-white',
+      
+      // Card details
+      type: card.card_type,
+      name: card.card_name,
+      number: card.card_number?.slice(-4) || 'N/A',
+      fullNumber: card.card_number,
+      balance: card.balance?.toLocaleString() || '0',
+      status: card.card_status ? 'Active' : 'Inactive',
+      description: card.card_description,
+      
+      // Usage info
+      usageCount: card.card_usage_count || 0,
+      lastUsed: card.lastUsageTime ? new Date(card.lastUsageTime.seconds * 1000).toLocaleDateString() : 'Never',
+      expires: card.expiryDate ? new Date(card.expiryDate.seconds * 1000).toLocaleDateString() : 'N/A',
+      
+      // Location and settings
+      locations: card.location || [],
+      locationTrack: card.location_track,
+      transactionAlert: card.transaction_alert,
+      pin: card.pin,
+      
+      // User info
+      userName: card.userName,
+      user_id: card.user_id,
+      created_at: card.created_at
+    };
+  };
+
+  // Filter cards based on search and filter type
+  const filteredCards = userCards
+    .map(transformCardData)
+    .filter(card => {
+      const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           card.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           card.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFilter = filterType === 'All Cards' || 
+                           (filterType === 'Payment' && ['credit', 'debit'].includes(card.type.toLowerCase())) ||
+                           (filterType === 'Loyalty' && card.type.toLowerCase() === 'loyalty') ||
+                           (filterType === 'Gift Cards' && card.type.toLowerCase() === 'gift') ||
+                           (filterType === 'Crypto' && card.type.toLowerCase() === 'crypto') ||
+                           (filterType === 'Travel' && card.type.toLowerCase() === 'travel');
+      
+      return matchesSearch && matchesFilter;
+    });
+
+  // Generate smart suggestions based on user's cards
+  const generateSmartSuggestions = () => {
+    const suggestions = [];
+    const usedCardIds = new Set(); // Track cards already added to suggestions
+    
+    // Most used card
+    const mostUsedCard = filteredCards.reduce((prev, current) => 
+      (prev.usageCount > current.usageCount) ? prev : current, filteredCards[0]);
+    
+    if (mostUsedCard && !usedCardIds.has(mostUsedCard.id)) {
+      suggestions.push({
+        id: mostUsedCard.id,
+        icon: mostUsedCard.icon,
+        title: mostUsedCard.name,
+        subtitle: `${mostUsedCard.type} •••• ${mostUsedCard.number}`,
+        badge: 'Most Used',
+        badgeVariant: 'purple',
+        actionText: `Used ${mostUsedCard.usageCount} times`,
+        iconBg: mostUsedCard.iconBg,
+        iconColor: mostUsedCard.iconColor
+      });
+      usedCardIds.add(mostUsedCard.id);
+    }
+
+    // Recently used card (exclude already used cards)
+    const recentCard = filteredCards
+      .filter(card => !usedCardIds.has(card.id))
+      .sort((a, b) => new Date(b.lastUsed) - new Date(a.lastUsed))[0];
+    
+    if (recentCard && !usedCardIds.has(recentCard.id)) {
+      suggestions.push({
+        id: recentCard.id,
+        icon: recentCard.icon,
+        title: recentCard.name,
+        subtitle: `${recentCard.type} •••• ${recentCard.number}`,
+        badge: 'Recent',
+        badgeVariant: 'info',
+        actionText: `Last used: ${recentCard.lastUsed}`,
+        iconBg: recentCard.iconBg,
+        iconColor: recentCard.iconColor
+      });
+      usedCardIds.add(recentCard.id);
+    }
+
+    // Location-based suggestion (exclude already used cards)
+    const locationCard = filteredCards.find(card => 
+      card.locationTrack && 
+      card.locations.length > 0 && 
+      !usedCardIds.has(card.id)
+    );
+    
+    if (locationCard && !usedCardIds.has(locationCard.id)) {
+      suggestions.push({
+        id: locationCard.id,
+        icon: MapPin,
+        title: locationCard.name,
+        subtitle: 'Location Tracking Enabled',
+        badge: 'Nearby',
+        badgeVariant: 'success',
+        actionText: `Available in ${locationCard.locations[0]}`,
+        iconBg: 'bg-green-50',
+        iconColor: 'text-green-600'
+      });
+      usedCardIds.add(locationCard.id);
+    }
+
+    // If we still have space and cards, add more unique suggestions
+    if (suggestions.length < 3) {
+      const remainingCards = filteredCards.filter(card => !usedCardIds.has(card.id));
+      
+      // Add active cards
+      const activeCards = remainingCards.filter(card => card.status === 'Active');
+      
+      for (const card of activeCards) {
+        if (suggestions.length >= 3) break;
+        
+        suggestions.push({
+          id: card.id,
+          icon: card.icon,
+          title: card.name,
+          subtitle: `${card.type} •••• ${card.number}`,
+          badge: 'Active',
+          badgeVariant: 'success',
+          actionText: `Balance: ${card.balance}`,
+          iconBg: card.iconBg,
+          iconColor: card.iconColor
+        });
+        usedCardIds.add(card.id);
+      }
+    }
+
+    return suggestions.slice(0, 3); // Limit to 3 suggestions max
+  };
+
+  const smartSuggestions = generateSmartSuggestions();
+
+  // Remove old static data and replace with dynamic data
+  const handleCardClick = (cardData) => {
+    console.log("Card clicked:", cardData);
+    router.push(`/dashboard/${cardData.id}`);
+  };
 
   const handleMenuClick = (cardData) => {
     console.log('Menu clicked:', cardData);
   };
 
   const handleDetailsClick = (cardData) => {
-    console.log('Details clicked:', cardData);
+    console.log('Details clicked :', cardData);
+    router.push(`/dashboard/${cardData.id}`);
+  };
+
+  const handleAddCard = () => {
+    router.push('/dashboard/add-card');
   };
 
   return (
@@ -185,8 +281,19 @@ const CardManager = ({ onMobileSidebarOpen }) => {
               </svg>
             </Button>
             <h1 className="text-xl lg:text-2xl font-bold text-gray-900">My Cards</h1>
+            {loading && (
+              <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
+            )}
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={fetchUserCards}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
             <Button variant="ghost" size="sm">
               <Bell className="h-5 w-5" />
             </Button>
@@ -199,7 +306,9 @@ const CardManager = ({ onMobileSidebarOpen }) => {
                 />
               ) : (
                 <div className="h-full w-full bg-blue-600 flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">?</span>
+                  <span className="text-sm font-medium text-white">
+                    {user?.displayName?.[0] || '?'}
+                  </span>
                 </div>
               )}
             </div>
@@ -214,33 +323,55 @@ const CardManager = ({ onMobileSidebarOpen }) => {
             Manage
           </Button>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="mt-1 text-red-600"
+              onClick={fetchUserCards}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
       </header>
 
       {/* Content */}
       <main className="flex-1 p-4 lg:p-6">
         {/* Smart Suggestions */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Smart Suggestions</h2>
-            <Button variant="ghost" size="sm">
-              Customize
-            </Button>
+        {smartSuggestions.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Smart Suggestions</h2>
+              <Button variant="ghost" size="sm">
+                Customize
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {smartSuggestions.map((suggestion, index) => (
+                <SmartSuggestions 
+                  key={suggestion.id || index} 
+                  {...suggestion} 
+                  onAction={() => handleCardClick(suggestion)}
+                />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {smartSuggestions.map((suggestion, index) => (
-              <SmartSuggestions 
-                key={index} 
-                {...suggestion} 
-                onAction={() => handleCardClick(suggestion)}
-              />
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* All Cards Section */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">All Cards</h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold text-gray-900">All Cards</h2>
+              <span className="text-sm text-gray-500">
+                ({filteredCards.length} card{filteredCards.length !== 1 ? 's' : ''})
+              </span>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
@@ -259,8 +390,9 @@ const CardManager = ({ onMobileSidebarOpen }) => {
                 Filter
               </Button>
               
-              <Button variant="outline" size="sm">
-                Recent
+              <Button variant="primary" size="sm" onClick={handleAddCard}>
+                <Plus className="h-4 w-4" />
+                Add Card
               </Button>
             </div>
           </div>
@@ -279,74 +411,96 @@ const CardManager = ({ onMobileSidebarOpen }) => {
             ))}
           </div>
 
+          {/* Loading State */}
+          {loading && !error && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+          )}
+
+          {/* No Cards State */}
+          {!loading && !error && filteredCards.length === 0 && userCards.length === 0 && (
+            <div className="text-center py-12">
+              <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No cards yet</h3>
+              <p className="text-gray-600 mb-4">Add your first card to get started</p>
+              <Button variant="primary" onClick={handleAddCard}>
+                <Plus className="h-4 w-4" />
+                Add Your First Card
+              </Button>
+            </div>
+          )}
+
+          {/* No Filtered Results */}
+          {!loading && !error && filteredCards.length === 0 && userCards.length > 0 && (
+            <div className="text-center py-12">
+              <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No cards found</h3>
+              <p className="text-gray-600 mb-4">Try adjusting your search or filter</p>
+              <Button variant="ghost" onClick={() => { setSearchTerm(''); setFilterType('All Cards'); }}>
+                Clear Filters
+              </Button>
+            </div>
+          )}
+
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {/* Credit Cards */}
-            {(filterType === 'All Cards' || filterType === 'Payment') && 
-              creditCards.map((card, index) => (
-                <MyCards 
-                  key={`credit-${index}`} 
-                  {...card} 
-                  onDetailsClick={() => handleDetailsClick(card)}
-                  onMenuClick={() => handleMenuClick(card)}
-                />
-              ))
-            }
-            {/* Loyalty Cards */}
-            {(filterType === 'All Cards' || filterType === 'Loyalty') && 
-              loyaltyCards.map((card, index) => (
-                <SingleCardDetails 
-                  key={`loyalty-${index}`} 
-                  {...card} 
-                  onDetailsClick={() => handleDetailsClick(card)}
-                  onMenuClick={() => handleMenuClick(card)}
-                />
-              ))
-            }
+          {!loading && !error && filteredCards.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* User's Real Cards */}
+              {filteredCards.map((card) => {
+                const isPaymentCard = ['credit', 'debit'].includes(card.type.toLowerCase());
+                
+                if (isPaymentCard) {
+                  return (
+                    <MyCards 
+                      key={card.id} 
+                      type={card.type}
+                      name={card.name}
+                      number={card.number}
+                      balance={card.balance}
+                      expires={card.expires}
+                      icon={card.icon}
+                      bgColor={card.bgColor}
+                      textColor={card.textColor}
+                      status={card.status}
+                      onDetailsClick={() => handleDetailsClick(card)}
+                      onMenuClick={() => handleMenuClick(card)}
+                    />
+                  );
+                } else {
+                  return (
+                    <SingleCardDetails 
+                      key={card.id} 
+                      name={card.name}
+                      type={card.type}
+                      balance={card.balance}
+                      status={card.status}
+                      lastUsed={card.lastUsed}
+                      icon={card.icon}
+                      bgColor={card.iconBg}
+                      iconColor={card.iconColor}
+                      usageCount={card.usageCount}
+                      locations={card.locations}
+                      onDetailsClick={() => handleDetailsClick(card)}
+                      onMenuClick={() => handleMenuClick(card)}
+                    />
+                  );
+                }
+              })}
 
-            {/* Crypto Cards */}
-            {(filterType === 'All Cards' || filterType === 'Crypto') && 
-              cryptoCards.map((card, index) => (
-                <SingleCardDetails 
-                  key={`crypto-${index}`} 
-                  {...card} 
-                  onDetailsClick={() => handleDetailsClick(card)}
-                  onMenuClick={() => handleMenuClick(card)}
-                />
-              ))
-            }
-
-            {/* Gift Cards */}
-            {(filterType === 'All Cards' || filterType === 'Gift Cards') && 
-              giftCards.map((card, index) => (
-                <SingleCardDetails 
-                  key={`gift-${index}`} 
-                  {...card} 
-                  onDetailsClick={() => handleDetailsClick(card)}
-                  onMenuClick={() => handleMenuClick(card)}
-                />
-              ))
-            }
-
-            {/* Membership Cards */}
-            {(filterType === 'All Cards' || filterType === 'Travel') && 
-              membershipCards.map((card, index) => (
-                <SingleCardDetails 
-                  key={`membership-${index}`} 
-                  {...card} 
-                  onDetailsClick={() => handleDetailsClick(card)}
-                  onMenuClick={() => handleMenuClick(card)}
-                />
-              ))
-            }
-
-            {/* Add New Card */}
-            <Card className="p-6 border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[200px]">
-              <Plus className="h-8 w-8 text-gray-400 mb-2" />
-              <h3 className="font-medium text-gray-900 mb-1">Add New Card</h3>
-              <p className="text-sm text-gray-600 text-center">Connect a payment or loyalty card</p>
-            </Card>
-          </div>
+              {/* Add New Card */}
+              <Card 
+                className="p-6 border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[200px]"
+                onClick={handleAddCard}
+              >
+                <Plus className="h-8 w-8 text-gray-400 mb-2" />
+                <h3 className="font-medium text-gray-900 mb-1">Add New Card</h3>
+                <p className="text-sm text-gray-600 text-center">Connect a payment or loyalty card</p>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
     </div>

@@ -16,7 +16,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
-    const sectionIds = ["hero", "features", "pricing", "privacy", "faq"];
+    const sectionIds = ["hero", "features", "howitworks", "privacy", "faq"];
     const handleScroll = () => {
       const scrollY = window.scrollY + 80; // account for navbar height
       let current = sectionIds[0];

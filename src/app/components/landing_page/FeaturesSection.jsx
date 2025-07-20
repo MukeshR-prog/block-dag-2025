@@ -3,15 +3,18 @@ import FeatureCard from "./FeatureCard";
 const FeaturesSection = () => (
   <section
     id="features"
-     className="bg-white pt-28 pb-14 px-4 md:pt-32 md:pb-18 md:px-16 rounded-2xl shadow-lg mx-auto mt-8 max-w-7xl">
+    className="bg-white pt-28 pb-14 px-4 md:pt-32 md:pb-18 md:px-16 rounded-2xl shadow-lg w-full mx-auto mt-8"
+  >
     <h2 className="text-4xl font-bold text-center mb-8">
       Smart Features for Everyday Use
     </h2>
+
     <p className="text-center text-lg text-gray-700 mb-10 max-w-2xl mx-auto">
       Our wallet adapts to your lifestyle, bringing the right cards to the
       surface exactly when you need them.
     </p>
-    <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+
+    <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 w-full">
       <FeatureCard
         icon="📍"
         title="Location Awareness"

@@ -20,6 +20,7 @@ export async function POST(req) {
       transaction_name,
       status,
       amount,
+      type
     } = body;
 
     if (!card_id || !user_id || !transaction_name || amount == null) {
@@ -34,6 +35,7 @@ export async function POST(req) {
       transaction_name,
       status: !!status,
       amount,
+      type ,
       created_at: Timestamp.now(),
     });
 

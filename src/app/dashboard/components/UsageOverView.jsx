@@ -40,7 +40,7 @@ const UsageOverview = ({ data }) => {
       <div className="mt-6 pt-6 border-t">
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-medium text-gray-700">Monthly Spending</div>
-          <div className="text-sm text-gray-500">Limit: $9,000.00</div>
+          <div className="text-sm text-gray-500">Limit: ₹9,000.00</div>
         </div>
         <div className="bg-gray-200 rounded-full h-3">
           <div 
@@ -49,8 +49,8 @@ const UsageOverview = ({ data }) => {
           ></div>
         </div>
         <div className="flex justify-between mt-2 text-sm text-gray-600">
-          <span>$2,450.78</span>
-          <span>$9,000.00</span>
+          <span>₹2,450.78</span>
+          <span>₹9,000.00</span>
         </div>
       </div>
     </div>

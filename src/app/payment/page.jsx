@@ -5,6 +5,7 @@ import useAuthStore from "../../store/authStore";
 import api from "../../lib/axios";
 import { useRouter } from 'next/navigation';
 import { ethers } from "ethers";
+import { type } from "os";
 
 const Page = () => {
   const router = useRouter();
@@ -52,11 +53,12 @@ const Page = () => {
 
   // Dummy transaction for testing
   const testTransaction = {
-    user_id: "ML51OlsMRcP9Ti2ruddkqldWbnk1",
-    card_id: "xDfvwphuzzqp2UpypvCt",
-    transaction_name: "Payment to college",
+    user_id: "IeRHUaPaS6dLMVpNfqtE32qJIpS2",
+    card_id: "ZZIHqZDiOa7ChFoUJwMO",
+    transaction_name: "Flipkart gift received",
     status: true,
-    amount: 100000,
+    type:"credit",
+    amount: 2000,
   };
 
   const addTransaction = async () => {

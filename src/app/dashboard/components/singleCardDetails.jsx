@@ -66,7 +66,7 @@ const SingleCardDetails = ({
       {balance && (
         <div className="flex justify-between">
           <span className="text-xs text-gray-500">Balance</span>
-          <span className="font-semibold text-gray-900">${balance}</span>
+          <span className="font-semibold text-gray-900">₹{balance}</span>
         </div>
       )}
       {status && (
