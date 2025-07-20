@@ -9,9 +9,11 @@ import {
   Smartphone,
   DollarSign,
   CreditCard,
+  Calendar,
+  ArrowUpRight,
+  Wallet,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import CardDisplay from "../components/CardDisplay";
 import QuickActions from "../components/QuickActions";
 import UsageOverview from "../components/UsageOverView";
 import RecentTransactions from "../components/RecentTransactions";
@@ -19,6 +21,9 @@ import SecurityPrivacy from "../components/SecurityPrivacy";
 import SmartSuggestions from "../components/SmartSuggestionsSection";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import api from "../../../lib/axios";
+
+// Import the UnifiedCard component
+import UnifiedCard from "../components/myCards";
 
 const CardDetailsPage = () => {
   const [cardInfo, setCardInfo] = useState(null);
@@ -84,6 +89,54 @@ const CardDetailsPage = () => {
     });
   };
 
+  // Transform cardInfo to match UnifiedCard props
+  const transformCardData = (cardData) => {
+    if (!cardData) return null;
+
+    const lastUsed = cardData.lastUsageTime?.toDate?.();
+    const expiryDate = cardData.expiryDate?.toDate?.();
+    
+    // Format last used date
+    let lastUsedText = null;
+    if (lastUsed) {
+      const now = new Date();
+      const diffDays = Math.floor((now - lastUsed) / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) lastUsedText = 'today';
+      else if (diffDays === 1) lastUsedText = 'yesterday';
+      else if (diffDays < 7) lastUsedText = `${diffDays} days ago`;
+      else lastUsedText = lastUsed.toLocaleDateString();
+    }
+
+    // Determine card type and icon
+    const getCardIcon = (cardName) => {
+      const name = cardName?.toLowerCase() || '';
+      if (name.includes('credit')) return CreditCard;
+      if (name.includes('wallet') || name.includes('digital')) return Wallet;
+      return CreditCard;
+    };
+
+    return {
+      type: cardData.card_type || 'Credit Card',
+      name: cardData.card_name || 'Card',
+      number: cardData.card_number?.slice(-4) || '0000', // Last 4 digits
+      balance: cardData.balance || 0,
+      limit: cardData.credit_limit || null,
+      expires: expiryDate ? `${String(expiryDate.getMonth() + 1).padStart(2, '0')}/${String(expiryDate.getFullYear()).slice(-2)}` : null,
+      lastUsed: lastUsedText,
+      status: cardData.status || 'active',
+      icon: getCardIcon(cardData.card_name),
+      usageCount: cardData.card_usage_count || 0,
+      locations: cardData.location || [],
+      onDetailsClick: () => {
+        // Already on details page, maybe scroll to transactions
+        const transactionsElement = document.getElementById('transactions-section');
+        if (transactionsElement) {
+          transactionsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    };
+  };
+
   useEffect(() => {
     if (!cardId) return;
 
@@ -122,9 +175,6 @@ const CardDetailsPage = () => {
       fullScreen={true}
     />
   );
-  
-  const lastUsed = cardInfo.lastUsageTime?.toDate?.() ?? null;
-  const expiryDate = cardInfo.expiryDate?.toDate?.() ?? null;
 
   // Generate smart suggestions based on real data
   const generateSmartSuggestions = () => {
@@ -194,10 +244,12 @@ const CardDetailsPage = () => {
     }
   };
 
+  const transformedCardData = transformCardData(cardInfo);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -235,31 +287,48 @@ const CardDetailsPage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Card Display and Quick Actions */}
-          <div className="lg:col-span-1 space-y-6">
-            <CardDisplay cardData={cardInfo} />
-            <QuickActions />
+          <div className="lg:col-span-1 space-y-4">
+            {/* Use UnifiedCard instead of CardDisplay */}
+            <div className="bg-transparent">
+              {transformedCardData && (
+                <UnifiedCard {...transformedCardData} />
+              )}
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <QuickActions />
+            </div>
           </div>
 
           {/* Right Column - Details and Transactions */}
-          <div className="lg:col-span-2 space-y-6">
-            <UsageOverview
-              data={{
-                lastUsed: lastUsed ? lastUsed.toLocaleString() : "N/A",
-                location: cardInfo.location?.[0] || "Unknown",
-                thisWeek: {
-                  times: cardInfo.card_usage_count || 0,
-                  amount: `₹${cardInfo.balance?.toLocaleString() || '0'}`,
-                },
-                mostUsedAt: transactions.length > 0 ? "Recent Activity" : "No Activity",
-                transactionPercentage: `${transactions.length} transactions`,
-              }}
-            />
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <UsageOverview
+                data={{
+                  lastUsed: transformedCardData?.lastUsed || "N/A",
+                  location: cardInfo.location?.[0] || "Unknown",
+                  thisWeek: {
+                    times: cardInfo.card_usage_count || 0,
+                    amount: `₹${cardInfo.balance?.toLocaleString() || '0'}`,
+                  },
+                  mostUsedAt: transactions.length > 0 ? "Recent Activity" : "No Activity",
+                  transactionPercentage: `${transactions.length} transactions`,
+                }}
+              />
+            </div>
 
-            <RecentTransactions transactions={transformedTransactions} />
-            <SecurityPrivacy />
-            <SmartSuggestions suggestions={generateSmartSuggestions()} />
+            <div id="transactions-section" className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <RecentTransactions transactions={transformedTransactions} />
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <SecurityPrivacy />
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <SmartSuggestions suggestions={generateSmartSuggestions()} />
+            </div>
           </div>
         </div>
       </div>
