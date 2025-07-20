@@ -23,6 +23,8 @@ const CardDetailsPage = () => {
   const [navigationLoading, setNavigationLoading] = useState(false);
   const [pinLoading, setPinLoading] = useState(false);
   const params = useParams();
+  const router = useRouter();
+
   const cardId = params["card-detail"];
 
   // Transform transaction data to match component expectations
