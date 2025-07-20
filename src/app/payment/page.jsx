@@ -11,12 +11,12 @@ const TransactionsPage = () => {
 
   // Dummy transaction for testing
   const testTransaction = {
-    user_id: "ML51OlsMRcP9Ti2ruddkqldWbnk1",
-    card_id: "gl0qbsF3Ril0GOsvtWP5",
-    transaction_name: "Payment from  amazon as sended as a salary",
+    user_id: "IeRHUaPaS6dLMVpNfqtE32qJIpS2",
+    card_id: "ZZIHqZDiOa7ChFoUJwMO",
+    transaction_name: "Flipkart gift received",
     status: true,
     type:"credit",
-    amount: 200000,
+    amount: 2000,
   };
 
   const addTransaction = async () => {
