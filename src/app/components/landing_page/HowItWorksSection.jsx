@@ -1,7 +1,7 @@
 const HowItWorksSection = () => (
   <section
     id="howitworks"
-    className="w-full min-h-screen scroll-mt-32 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 pt-28 pb-10 px-4 md:pt-32 md:pb-20 md:px-20 rounded-2xl shadow-lg mx-auto mt-8"
+     className="w-full min-h-screen scroll-mt-20 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 pt-8 md:pt-10 pb-8 px-4 md:px-20 rounded-2xl shadow-lg mx-auto mt-4"
   >
     <h2 className="text-4xl font-bold text-center mb-12 mt-4">
       How CardSmart Works

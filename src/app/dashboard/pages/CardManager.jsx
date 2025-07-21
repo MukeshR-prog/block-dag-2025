@@ -452,7 +452,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
               {filteredCards.map((card) => {
                 const isPaymentCard = ['credit', 'debit'].includes(card.type.toLowerCase());
                 
-                if (isPaymentCard) {
+                // if (isPaymentCard) {
                   return (
                     <MyCards 
                       key={card.id} 
@@ -469,25 +469,25 @@ const CardManager = ({ onMobileSidebarOpen }) => {
                       onMenuClick={() => handleMenuClick(card)}
                     />
                   );
-                } else {
-                  return (
-                    <SingleCardDetails 
-                      key={card.id} 
-                      name={card.name}
-                      type={card.type}
-                      balance={card.balance}
-                      status={card.status}
-                      lastUsed={card.lastUsed}
-                      icon={card.icon}
-                      bgColor={card.iconBg}
-                      iconColor={card.iconColor}
-                      usageCount={card.usageCount}
-                      locations={card.locations}
-                      onDetailsClick={() => handleDetailsClick(card)}
-                      onMenuClick={() => handleMenuClick(card)}
-                    />
-                  );
-                }
+                // } else {
+                //   return (
+                //     <SingleCardDetails 
+                //       key={card.id} 
+                //       name={card.name}
+                //       type={card.type}
+                //       balance={card.balance}
+                //       status={card.status}
+                //       lastUsed={card.lastUsed}
+                //       icon={card.icon}
+                //       bgColor={card.iconBg}
+                //       iconColor={card.iconColor}
+                //       usageCount={card.usageCount}
+                //       locations={card.locations}
+                //       onDetailsClick={() => handleDetailsClick(card)}
+                //       onMenuClick={() => handleMenuClick(card)}
+                //     />
+                //   );
+                // }
               })}
 
               {/* Add New Card */}

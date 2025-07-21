@@ -9,7 +9,45 @@ export default function TransactionPage() {
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
     const [isPaying, setIsPaying] = useState(false);
     const [notification, setNotification] = useState({ isOpen: false, type: '', message: '' });
-    const { sendTransaction, transactionStatus } = useTransaction();
+    const [mmStatus, setMmStatus] = useState("");
+    const [mmError, setMmError] = useState("");
+    const [transactionStatus, setTransactionStatus] = useState(null);
+    const [recipient, setRecipient] = useState("");
+    const [amount, setAmount] = useState("");
+    // Handler to add BlockDAG Primordial Testnet to MetaMask
+    const handleAddBlockDAGNetwork = async () => {
+        setMmStatus("");
+        setMmError("");
+        if (!window.ethereum) {
+            setMmError("MetaMask is not installed.");
+            return;
+        }
+        try {
+            await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [
+                    {
+                        chainId: "0x413", // 1043 in hex
+                        chainName: "Primordial BlockDAG Testnet",
+                        rpcUrls: ["https://rpc.primordial.bdagscan.com"],
+                        nativeCurrency: {
+                            name: "BDAG",
+                            symbol: "BDAG",
+                            decimals: 18,
+                        },
+                        blockExplorerUrls: ["https://primordial.bdagscan.com/"],
+                    },
+                ],
+            });
+            setMmStatus("BlockDAG Testnet added to MetaMask!");
+        } catch (err) {
+            setMmError(err.message || "Failed to add network.");
+        }
+    };
+
+    // (removed duplicate declaration)
+
+
 
     useEffect(() => {
         if (timeLeft > 0 && !isPaying) {
@@ -23,29 +61,47 @@ export default function TransactionPage() {
         }
     }, [timeLeft, isPaying, router]);
 
+    // Use MetaMask to send transaction from one account to another
     const handleCompletePayment = async () => {
         setIsPaying(true);
+        setTransactionStatus(null);
+        setNotification({ isOpen: false, type: '', message: '' });
         try {
-            const result = await sendTransaction();
-            
+            if (!window.ethereum) {
+                throw new Error('MetaMask is required to send transactions.');
+            }
+            if (!recipient || !amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+                setNotification({ isOpen: true, type: 'error', message: 'Please enter a valid recipient address and amount.' });
+                setIsPaying(false);
+                return;
+            }
+            // Get sender address (first account in MetaMask)
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const sender = accounts[0];
+            // Prepare transaction params for MetaMask
+            const valueWei = '0x' + (Number(amount) * 1e18).toString(16);
+            const txParams = {
+                from: sender,
+                to: recipient,
+                value: valueWei,
+                gas: '0x5208', // 21000
+            };
+            // Send transaction via MetaMask
+            const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [txParams],
+            });
+            setTransactionStatus({ success: true, hash: txHash });
             setNotification({
                 isOpen: true,
-                type: result.success ? 'success' : 'error',
-                message: result.success 
-                    ? `Transaction successful! Hash: ${result.hash.slice(0, 10)}...` 
-                    : result.error
+                type: 'success',
+                message: `Transaction successful! Hash: ${txHash.slice(0, 10)}...`
             });
-
-            if (result.success) {
-                // Redirect after 3 seconds on success
-                setTimeout(() => {
-                    router.push('/dashboard');
-                }, 3000);
-            } else {
-                setIsPaying(false);
-            }
+            setTimeout(() => {
+                router.push('/dashboard');
+            }, 3000);
         } catch (error) {
-            console.error('Transaction failed:', error);
+            setTransactionStatus({ success: false, error: error.message });
             setNotification({
                 isOpen: true,
                 type: 'error',
@@ -63,10 +119,20 @@ export default function TransactionPage() {
 
     return (
         <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center py-4 gap-2">
+                <button
+                    onClick={handleAddBlockDAGNetwork}
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-bold shadow hover:scale-105 transition-transform duration-200"
+                >
+                    Add BlockDAG Testnet to MetaMask
+                </button>
+                {mmStatus && <div className="text-green-600 text-center mb-2">{mmStatus}</div>}
+                {mmError && <div className="text-red-600 text-center mb-2">{mmError}</div>}
+            </div>
             <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold mb-2">Complete Your Payment</h1>
-                    <div className="text-gray-600">
+                    <h1 className="text-2xl font-bold mb-2 text-black">Complete Your Payment</h1>
+                    <div className="text-gray-800">
                         Time Remaining: 
                         <span className={`ml-2 font-mono text-xl ${timeLeft < 60 ? 'text-red-600' : 'text-green-600'}`}>
                             {formatTime(timeLeft)}
@@ -75,22 +141,42 @@ export default function TransactionPage() {
                 </div>
 
                 <div className="space-y-6">
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-black mb-1">Recipient Address</label>
+                        <input
+                            type="text"
+                            value={recipient}
+                            onChange={e => setRecipient(e.target.value)}
+                            placeholder="Enter recipient address"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-black mb-1">Amount (BDAG)</label>
+                        <input
+                            type="number"
+                            min="0.000000000000000001"
+                            step="any"
+                            value={amount}
+                            onChange={e => setAmount(e.target.value)}
+                            placeholder="Enter amount to transfer"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
+                        />
+                    </div>
                     <div className="bg-gray-50 p-4 rounded-md">
-                        <h2 className="text-lg font-semibold mb-2">Payment Details</h2>
-                        <div className="space-y-2">
+                        <h2 className="text-lg font-semibold mb-2 text-black">Payment Details</h2>
+                        <div className="space-y-2 text-black">
+                            <div className="flex justify-between">
+                                <span>Recipient:</span>
+                                <span className="font-mono break-all">{recipient || <span className="italic text-gray-400">Not entered</span>}</span>
+                            </div>
                             <div className="flex justify-between">
                                 <span>Amount:</span>
-                                <span className="font-medium">$50.00</span>
+                                <span className="font-medium">{amount ? `${amount} BDAG` : <span className="italic text-gray-400">Not entered</span>}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Processing Fee:</span>
                                 <span className="font-medium">$1.50</span>
-                            </div>
-                            <div className="border-t pt-2 mt-2">
-                                <div className="flex justify-between font-bold">
-                                    <span>Total:</span>
-                                    <span>$51.50</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,6 +192,15 @@ export default function TransactionPage() {
                     >
                         {isPaying ? 'Processing...' : 'Complete Payment'}
                     </button>
+                    {isPaying && !transactionStatus?.hash && (
+                        <div className="text-blue-600 text-center mt-2">Processing transaction...</div>
+                    )}
+                    {transactionStatus?.hash && (
+                        <div className="text-green-600 text-center mt-2">Transaction Successful!<br/>Hash: <span className="font-mono">{transactionStatus.hash}</span></div>
+                    )}
+                    {transactionStatus?.error && (
+                        <div className="text-red-600 text-center mt-2">Transaction Failed or Rejected.<br/>{transactionStatus.error}</div>
+                    )}
 
                     <button
                         onClick={() => router.back()}
