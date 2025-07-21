@@ -478,19 +478,7 @@ const Transactions = () => {
                   }
                 }}
               />
-              {/* Debug info - remove in production */}
-              {/* {process.env.NODE_ENV === 'development' && (
-                <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <strong className="text-gray-800">Debug Information</strong>
-                  </div>
-                  <div className="space-y-1 text-gray-600">
-                    <div><strong>Categories:</strong> {Object.keys(enhancedCategoryTotals).join(', ')}</div>
-                    <div><strong>Values:</strong> {Object.values(enhancedCategoryTotals).map(v => `₹${v.toLocaleString()}`).join(', ')}</div>
-                  </div>
-                </div>
-              )} */}
+            
             </div>
           ) : (
             <div className="h-72 flex items-center justify-center">

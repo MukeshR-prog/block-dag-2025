@@ -12,6 +12,7 @@
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
+    "ethers": "^6.15.0",
     "firebase": "^11.10.0",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
@@ -21,10 +22,9 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "24.0.13",
-    "@types/react": "19.1.8",
-    "tailwindcss": "^4",
-    "typescript": "5.8.3"
+    "hardhat": "^2.26.0",
+    "tailwindcss": "^4"
   }
 }

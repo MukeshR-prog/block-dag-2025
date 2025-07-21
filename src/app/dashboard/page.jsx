@@ -6,12 +6,56 @@ import Navbar from './components/navbar';
 import CardManager from './pages/CardManager';
 import Transactions from './pages/Transactions';
 import Button from './components/Button';
+import { getTokenBalance, sendToken, BDAG_TOKEN_ADDRESS } from '../../lib/ethereum';
 import LoadingSpinner from '../../components/LoadingSpinner';
 const Page = () => {
   const { user, loading } = useAuthStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('cards');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // --- BDAG Token Balance and Send UI ---
+  const [bdagBalance, setBdagBalance] = useState('');
+  const [sendTo, setSendTo] = useState('');
+  const [sendAmount, setSendAmount] = useState('');
+  const [txStatus, setTxStatus] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading]);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        if (user?.walletAddress) {
+          const balance = await getTokenBalance(user.walletAddress);
+          setBdagBalance(balance);
+        }
+      } catch (err) {
+        setBdagBalance('Error');
+      }
+    };
+    // TODO: Update with the correct wallet address property if needed
+    if (user?.walletAddress) fetchBalance();
+  }, [user?.walletAddress]);
+
+  const handleSendToken = async (e) => {
+    e.preventDefault();
+    setIsSending(true);
+    setTxStatus('');
+    try {
+      const txHash = await sendToken(sendTo, sendAmount);
+      setTxStatus(`Sent! Tx Hash: ${txHash}`);
+      setSendTo('');
+      setSendAmount('');
+    } catch (err) {
+      setTxStatus(err.message || 'Send failed');
+    }
+    setIsSending(false);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -128,11 +172,6 @@ const Page = () => {
         return <CardManager onMobileSidebarOpen={() => setIsMobileSidebarOpen(true)} />;
     }
   };
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading]);
 
   if (loading) return (
     <LoadingSpinner 
@@ -143,43 +182,43 @@ const Page = () => {
     />
   );
   if (!user) return null;
+
   return (
-  <div className="min-h-screen bg-gray-50 flex relative">
-    
-    {/* Mobile Sidebar (should be on top) */}
-    <div className="lg:hidden z-50">
-      <Navbar 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab}
-        isMobile={true}
-        isOpen={isMobileSidebarOpen}
-        onClose={() => setIsMobileSidebarOpen(false)}
-      />
-    </div>
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Mobile Sidebar (should be on top) */}
+      <div className="lg:hidden z-50">
+        <Navbar 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          isMobile={true}
+          isOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
+        />
+      </div>
 
-    {/* Overlay (below the sidebar) */}
-    {isMobileSidebarOpen && (
-      <div 
-        className="fixed inset-0 backdrop-blur-sm bg-black/20 z-40 lg:hidden"
-        onClick={() => setIsMobileSidebarOpen(false)}
-      />
-    )}
+      {/* Overlay (below the sidebar) */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 backdrop-blur-sm bg-black/20 z-40 lg:hidden"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
 
-    {/* Desktop Sidebar */}
-    <div className="hidden lg:block z-30">
-      <Navbar 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab}
-        isMobile={false}
-        isOpen={true}
-      />
-    </div>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block z-30">
+        <Navbar 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          isMobile={false}
+          isOpen={true}
+        />
+      </div>
 
-    {/* Main Content */}
-    <div className="flex-1 flex flex-col z-10">
-      {renderContent()}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col z-10">
+        {renderContent()}
+      </div>
     </div>
-  </div>
   );
 
 };
