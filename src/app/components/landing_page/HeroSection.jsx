@@ -1,65 +1,60 @@
 import React from "react";
 
 const HeroSection = () => (
-  <section
-    id="hero"
-    className="relative grid md:grid-cols-2 gap-10 px-4 py-6 md:px-16 md:py-20 items-center bg-white min-h-[80vh]">
-    {/* Left: Headline, subheadline, CTAs, avatars, rating */}
-    <div className="flex flex-col justify-center items-start z-10">
-      <h1 className="text-2xl md:text-4xl font-extrabold leading-tight mb-6 mt-13 text-gray-900">
-        Your Cards,<span className="text-sky-600"> Intelligently</span>
-        <br />
+  <section id="hero" className="w-full h-auto md:h-screen bg-white px-4 md:px-12 py-10 md:py-0 overflow-hidden flex flex-col md:flex-row items-center justify-center">
+    
+    {/* Left Content */}
+    <div className="flex-1 max-w-xl text-center md:text-left">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+        Your Cards,<br />
+        <span className="text-sky-600">Intelligently</span><br />
         <span className="text-sky-600">Organized</span>
       </h1>
-      <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
+      <p className="text-sm sm:text-base md:text-lg text-gray-600 mt-4 mb-6">
         CardSmart brings your digital wallet to life with context-aware card
         management that learns your habits and adapts to your needs.
       </p>
-      <div className="flex items-center gap-4 mt-2">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-center md:justify-start">
+        <button className="bg-sky-600 text-white px-6 py-2 rounded-full shadow hover:bg-sky-700 transition">
+          Download App
+        </button>
+        <button className="border border-sky-600 text-sky-600 px-6 py-2 rounded-full hover:bg-sky-50 transition">
+          Watch Demo
+        </button>
+      </div>
+      <div className="flex items-center justify-center md:justify-start gap-3">
         <div className="flex -space-x-3">
           <img
             src="https://randomuser.me/api/portraits/women/44.jpg"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white"
             alt="user1"
-            className="w-10 h-10 rounded-full border-2 border-white object-cover"
           />
           <img
             src="https://randomuser.me/api/portraits/men/32.jpg"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white"
             alt="user2"
-            className="w-10 h-10 rounded-full border-2 border-white object-cover"
           />
           <img
             src="https://randomuser.me/api/portraits/men/65.jpg"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white"
             alt="user3"
-            className="w-10 h-10 rounded-full border-2 border-white object-cover"
           />
         </div>
-        <span className="flex items-center ml-4">
-          <span className="flex items-center gap-1">
-            <span className="text-yellow-400 text-xl leading-none">★</span>
-            <span className="text-yellow-400 text-xl leading-none">★</span>
-            <span className="text-yellow-400 text-xl leading-none">★</span>
-            <span className="text-yellow-400 text-xl leading-none">★</span>
-            <span className="text-yellow-400 text-xl leading-none">★</span>
-          </span>
-          <span className="ml-2 font-bold text-gray-800 text-base">4.9/5</span>
-        </span>
-        <span className="text-gray-500 text-base ml-2">
-          from 2,000+ reviews
-        </span>
+        <div className="text-gray-800 text-sm sm:text-base font-medium">
+          <span className="text-yellow-400 text-lg sm:text-xl">★★★★★</span>
+          <span className="ml-2 font-bold">4.9/5</span>
+          <span className="text-gray-500 ml-2 hidden sm:inline">from 2,000+ reviews</span>
+        </div>
       </div>
     </div>
-    {/* Right: iPhone image with blue glow */}
-    <div className="flex flex-col items-center justify-center relative w-full min-h-[260px] md:min-h-[340px]">
-      <div className="absolute -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-sky-200 blur-[100px] opacity-40"></div>
-      <div className="flex justify-center items-end w-full h-full">
+
+    {/* Right Image */}
+    <div className="flex-1 flex items-center justify-center mt-10 md:mt-0">
+      <div className="w-[300px] sm:w-[400px] md:w-[600px] lg:w-[750px] aspect-square translate-x-0 md:translate-x-6">
         <img
-          src="/mobileImage.png"
-          alt="iPhone Wallet with Cards"
-          className="mx-auto w-[100px] md:w-[140px] lg:w-[170px] max-w-full rounded-[2.5rem] object-contain shadow-lg"
-          style={{
-            aspectRatio: "9/19",
-            boxShadow: "0 8px 32px 0 rgba(0, 180, 255, 0.10)",
-          }}
+          src="/wallet.png"
+          alt="Wallet UI"
+          className="w-full h-full object-contain"
         />
       </div>
     </div>

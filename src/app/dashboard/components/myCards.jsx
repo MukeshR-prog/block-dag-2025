@@ -51,7 +51,7 @@ const UnifiedCard = ({
 
   return (
     <div className="w-full">
-      <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] aspect-[1.7/1] rounded-2xl">
+      <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] aspect-[1.7/1] rounded-2xl  ">
         {/* Single gradient background - one of three colors */}
         <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient()}`}>
           {/* Subtle overlay patterns for depth */}
