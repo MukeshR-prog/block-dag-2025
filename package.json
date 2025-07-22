@@ -6,12 +6,22 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:blockdag": "hardhat run scripts/deploy.js --network blockdag_primordial",
+    "verify:blockdag": "hardhat run scripts/verify.js --network blockdag_primordial",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.4.5",
     "ethers": "^6.15.0",
     "firebase": "^11.10.0",
     "lucide-react": "^0.525.0",
@@ -22,9 +32,24 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.14",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
     "@tailwindcss/postcss": "^4",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "chai": "^4.2.0",
     "hardhat": "^2.26.0",
-    "tailwindcss": "^4"
+    "hardhat-gas-reporter": "^2.0.0",
+    "solidity-coverage": "^0.8.1",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.0",
+    "typescript": "^5.8.3"
   }
 }
