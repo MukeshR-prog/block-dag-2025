@@ -59,6 +59,10 @@ const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('30');
   const [error, setError] = useState('');
+  
+  // ✅ Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [transactionsPerPage] = useState(4);
 
   // Category icon mapping
   const getCategoryIcon = (category) => {
@@ -252,9 +256,43 @@ const Transactions = () => {
     return matchesFilter && matchesSearch;
   });
 
+  // ✅ Pagination calculations
+  const totalTransactions = filteredTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / transactionsPerPage);
+  const startIndex = (currentPage - 1) * transactionsPerPage;
+  const endIndex = startIndex + transactionsPerPage;
+  const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+  // ✅ Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, searchTerm]);
+
+  // ✅ Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to transactions section
+    const transactionsSection = document.getElementById('transactions-section');
+    if (transactionsSection) {
+      transactionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
-  }, [user]);
+  }, [user,dateFilter]);
 
   if (loading) {
     return <LoadingSpinner type="transactions" size="large" />;
@@ -296,7 +334,7 @@ const Transactions = () => {
               onChange={(e) => setDateFilter(e.target.value)}
               className="appearance-none bg-white border border-gray-200 hover:border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer text-sm text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 pr-10"
             >
-              <option value="7">Last 7 days</option>
+              <option value="1">Last 1 days</option>
               <option value="30">Last 30 days</option>
               <option value="90">Last 90 days</option>
               <option value="365">Last year</option>
@@ -309,88 +347,88 @@ const Transactions = () => {
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Income */}
-        <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
-                <div className="w-1.5 h-1.5 bg-emerald-200 rounded-full"></div>
-                <p className="text-emerald-100 text-xs font-medium uppercase tracking-wide">Total Income</p>
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Income</p>
               </div>
-              <p className="text-2xl font-bold">₹{totalIncome.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">₹{totalIncome.toLocaleString()}</p>
             </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <ArrowUpRight className="w-6 h-6" />
+            <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-3 rounded-xl shadow-sm">
+              <ArrowUpRight className="w-6 h-6 text-white" />
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="bg-emerald-400/30 p-1.5 rounded-md">
-              <TrendingUp className="w-4 h-4" />
+            <div className="bg-emerald-100 p-1.5 rounded-md">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
-              <span className="text-emerald-100 text-sm">+12.5% growth</span>
-              <p className="text-emerald-200 text-xs">vs last month</p>
+              <span className="text-emerald-600 text-sm font-medium">+12.5% growth</span>
+              <p className="text-gray-500 text-xs">vs last month</p>
             </div>
           </div>
         </div>
 
         {/* Total Expenses */}
-        <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
-                <div className="w-1.5 h-1.5 bg-red-200 rounded-full"></div>
-                <p className="text-red-100 text-xs font-medium uppercase tracking-wide">Total Expenses</p>
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Expenses</p>
               </div>
-              <p className="text-2xl font-bold">₹{totalExpenses.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">₹{totalExpenses.toLocaleString()}</p>
             </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <ArrowDownRight className="w-6 h-6" />
+            <div className="bg-gradient-to-br from-red-500 to-rose-600 p-3 rounded-xl shadow-sm">
+              <ArrowDownRight className="w-6 h-6 text-white" />
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="bg-red-400/30 p-1.5 rounded-md">
+            <div className="bg-red-100 p-1.5 rounded-md">
               {expenseChange < 0 ? (
-                <TrendingDown className="w-4 h-4" />
+                <TrendingDown className="w-4 h-4 text-red-600" />
               ) : (
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className="w-4 h-4 text-red-600" />
               )}
             </div>
             <div>
-              <span className="text-red-100 text-sm">
+              <span className="text-red-600 text-sm font-medium">
                 {expenseChange >= 0 ? '+' : ''}{expenseChange.toFixed(1)}% change
               </span>
-              <p className="text-red-200 text-xs">vs last month</p>
+              <p className="text-gray-500 text-xs">vs last month</p>
             </div>
           </div>
         </div>
 
         {/* Net Balance */}
-        <div className={`bg-gradient-to-br ${netBalance >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-amber-600'} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300`}>
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
-                <div className={`w-1.5 h-1.5 ${netBalance >= 0 ? 'bg-blue-200' : 'bg-orange-200'} rounded-full`}></div>
-                <p className={`${netBalance >= 0 ? 'text-blue-100' : 'text-orange-100'} text-xs font-medium uppercase tracking-wide`}>Net Balance</p>
+                <div className={`w-1.5 h-1.5 ${netBalance >= 0 ? 'bg-blue-400' : 'bg-orange-400'} rounded-full`}></div>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Net Balance</p>
               </div>
-              <p className="text-2xl font-bold">₹{Math.abs(netBalance).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">₹{Math.abs(netBalance).toLocaleString()}</p>
             </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <DollarSign className="w-6 h-6" />
+            <div className={`bg-gradient-to-br ${netBalance >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-amber-600'} p-3 rounded-xl shadow-sm`}>
+              <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`${netBalance >= 0 ? 'bg-blue-400/30' : 'bg-orange-400/30'} p-1.5 rounded-md`}>
+            <div className={`${netBalance >= 0 ? 'bg-blue-100' : 'bg-orange-100'} p-1.5 rounded-md`}>
               {netBalance >= 0 ? (
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className={`w-4 h-4 ${netBalance >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
               ) : (
-                <TrendingDown className="w-4 h-4" />
+                <TrendingDown className={`w-4 h-4 ${netBalance >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
               )}
             </div>
             <div>
-              <span className={`${netBalance >= 0 ? 'text-blue-100' : 'text-orange-100'} text-sm`}>
+              <span className={`${netBalance >= 0 ? 'text-blue-600' : 'text-orange-600'} text-sm font-medium`}>
                 {netBalance >= 0 ? 'Healthy savings' : 'Budget review needed'}
               </span>
-              <p className={`${netBalance >= 0 ? 'text-blue-200' : 'text-orange-200'} text-xs`}>Financial status</p>
+              <p className="text-gray-500 text-xs">Financial status</p>
             </div>
           </div>
         </div>
@@ -658,7 +696,7 @@ const Transactions = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div id="transactions-section" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
@@ -707,9 +745,23 @@ const Transactions = () => {
           </div>
         </div>
 
+        {/* ✅ Pagination Info */}
+        {totalTransactions > 0 && (
+          <div className="flex items-center justify-between mb-4 py-2 border-b border-gray-100">
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray-600">
+                Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                <span className="font-medium">{Math.min(endIndex, totalTransactions)}</span> of{' '}
+                <span className="font-medium">{totalTransactions}</span> transactions
+              </p>
+            </div>
+            <p className="text-sm text-gray-500">Page {currentPage} of {totalPages}</p>
+          </div>
+        )}
+
         {/* Transaction List */}
         <div className="space-y-3">
-          {filteredTransactions.map((transaction) => {
+          {currentTransactions.map((transaction) => {
             const CategoryIcon = getCategoryIcon(transaction.category);
             const categoryColor = getCategoryColor(transaction.category);
             const transactionDate = new Date(transaction.created_at);
@@ -767,6 +819,73 @@ const Transactions = () => {
             );
           })}
         </div>
+
+        {/* ✅ Pagination Controls */}
+        {totalTransactions > transactionsPerPage && (
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                currentPage === 1 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Previous</span>
+            </button>
+            
+            <div className="flex items-center space-x-2">
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
+                const isCurrentPage = page === currentPage;
+                const isNearCurrentPage = Math.abs(page - currentPage) <= 2;
+                const isFirstOrLast = page === 1 || page === totalPages;
+                
+                if (!isNearCurrentPage && !isFirstOrLast) {
+                  if (page === currentPage - 3 || page === currentPage + 3) {
+                    return (
+                      <span key={page} className="px-2 text-gray-400">...</span>
+                    );
+                  }
+                  return null;
+                }
+                
+                return (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isCurrentPage
+                        ? 'bg-blue-600 text-white shadow-sm' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                currentPage === totalPages 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
+              }`}
+            >
+              <span>Next</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {filteredTransactions.length === 0 && (
           <div className="text-center py-12">

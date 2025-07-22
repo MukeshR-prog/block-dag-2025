@@ -8,9 +8,18 @@ const useAuthStore = create(
     (set, get) => ({
       user: null,
       loading: true,
-      setUser: (user) => set({ user, loading: false }),
-      logout: () => set({ user: null, loading: false }),
+      isDemo: false, // Track if user is using demo credentials
+      setUser: (user, isDemo = false) => set({ user, loading: false, isDemo }),
+      logout: () => set({ user: null, loading: false, isDemo: false }),
       initializeAuth: () => {
+        const currentState = get();
+        
+        // If user is already logged in with demo credentials, don't override
+        if (currentState.user && currentState.isDemo) {
+          set({ loading: false });
+          return;
+        }
+
         onAuthStateChanged(auth, (firebaseUser) => {
           if (firebaseUser) {
             set({
@@ -21,9 +30,16 @@ const useAuthStore = create(
                 photoURL: firebaseUser.photoURL,
               },
               loading: false,
+              isDemo: false,
             });
           } else {
-            set({ user: null, loading: false });
+            // Only clear user if they're not using demo credentials
+            const state = get();
+            if (!state.isDemo) {
+              set({ user: null, loading: false, isDemo: false });
+            } else {
+              set({ loading: false });
+            }
           }
         });
       },

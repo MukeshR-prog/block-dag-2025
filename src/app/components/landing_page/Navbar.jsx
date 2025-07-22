@@ -67,7 +67,7 @@ const Navbar = ({ activeSection, setActiveSection, router }) => {
             <button
               key={item.id}
               type="button"
-              className={`px-4 py-2 rounded-xl focus:outline-none transition-all duration-200 border-b-2 shadow-sm font-semibold tracking-wide relative overflow-hidden group ${
+              className={`px-4 py-2 rounded-xl focus:outline-none transition-all duration-200 border-b-2 shadow-sm font-semibold tracking-wide relative overflow-hidden group cursor-pointer ${
                 activeSection === item.id
                   ? "text-sky-600 border-sky-600 bg-gradient-to-r from-sky-50/80 to-purple-50/80"
                   : "text-gray-700 border-transparent hover:text-indigo-600 hover:bg-gradient-to-r hover:from-indigo-50/80 hover:to-pink-50/80"
@@ -83,7 +83,7 @@ const Navbar = ({ activeSection, setActiveSection, router }) => {
             </button>
           ))}
           <button
-            className="px-2 py-2 border border-indigo-600 text-indigo-600 rounded-xl bg-white hover:bg-gradient-to-r hover:from-indigo-100 hover:to-pink-100 transition font-bold shadow-sm"
+            className="px-2 py-2 border border-indigo-600 text-indigo-600 rounded-xl bg-white hover:bg-gradient-to-r cursor-pointer hover:from-indigo-100 hover:to-pink-100 transition font-bold shadow-sm"
             onClick={() => router.push("/login")}
           >
             Login

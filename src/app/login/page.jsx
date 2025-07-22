@@ -56,7 +56,7 @@ export default function LoginPage() {
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
-      });
+      }, false); // Pass false to indicate this is a real Firebase user
       
       router.push("/dashboard");
     } catch (err) {
@@ -68,28 +68,28 @@ export default function LoginPage() {
   };
 
   const handleEmailLogin = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     setIsLoading(true);
     setError('');
 
     // Simulate API call delay
-    setTimeout(() => {
+    // setTimeout(() => {
       if (formData.email === dummyCredentials.email && formData.password === dummyCredentials.password) {
         // Create dummy user object
         const dummyUser = {
-          uid: 'demo-user-123',
-          email: 'demo@blockdag.com',
-          displayName: 'Demo User',
+          uid: 'ML51OlsMRcP9Ti2ruddkqldWbnk1',
+          email: 'mukesh6381952282@gmail.com',
+          displayName: 'Mukesh',
           photoURL: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
         };
         
-        setUser(dummyUser);
+        setUser(dummyUser, true); // Pass true to indicate this is a demo user
         router.push("/dashboard");
       } else {
         setError('Invalid credentials. Use demo@blockdag.com / demo123');
       }
       setIsLoading(false);
-    }, 1000);
+    // }, 1000);
   };
 
   const handleLogout = async () => {

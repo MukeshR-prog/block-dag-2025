@@ -218,8 +218,9 @@ const CardDetailsPage = () => {
     );
   const handlePaymentClick = () => {
     try {
-      router.push("/transaction");
-      console.log("Navigating to transaction page from card details");
+      // ✅ Pass the cardId to the transaction page
+      router.push(`/transaction?card_id=${cardId}`);
+      console.log("Navigating to transaction page from card details with cardId:", cardId);
     } catch (error) {
       console.error("Navigation error:", error);
     }
@@ -349,7 +350,21 @@ const CardDetailsPage = () => {
               {transformedCardData && <UnifiedCard {...transformedCardData} />}
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <QuickActions />
+              {/* <QuickActions cardId={cardId} onPaymentClick={handlePaymentClick} /> */}
+            </div>
+            {/* ✅ Add Payment Button */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Quick Payment</h3>
+              <button
+                onClick={handlePaymentClick}
+                className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+              >
+                <ArrowUpRight className="h-4 w-4 mr-2" />
+                Make BlockDAG Payment
+              </button>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Transfer BDAG tokens using this card
+              </p>
             </div>
           </div>
 

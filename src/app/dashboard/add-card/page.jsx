@@ -89,10 +89,10 @@ const AddCardPage = () => {
   // Demo data button handler
   const fillDemoData = () => {
     setFormData({
-      card_name: 'SBI Smart Card',
-      card_type: 'Debit',
+      card_name: 'SBI gift Card',
+      card_type: 'Gift',
       card_number: '1234-5678-9012-3456',
-      card_description: 'Gain more rewards with SBI smart card',
+      card_description: 'Gain more rewards with SBI gift card',
       balance: '1000',
       pin: '1234',
       expiryDate: '2027-04-30',
@@ -123,7 +123,8 @@ const AddCardPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-4 lg:p-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className='flex gap-4'>
           <Button
             variant="ghost"
             size="sm"
@@ -132,21 +133,22 @@ const AddCardPage = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold text-gray-900">Add New Card</h1>
+          </div>
+             <div className="flex justify-end">
+              <button
+               type="button"
+                className='p-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors'
+                onClick={fillDemoData}
+              >
+                Fill Demo Data
+              </button>
+            </div>
         </div>
 
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Demo Data Button */}
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={fillDemoData}
-              >
-                Fill Demo Data
-              </Button>
-            </div>
+         
 
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
