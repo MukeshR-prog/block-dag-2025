@@ -77,9 +77,9 @@ export default function LoginPage() {
       if (formData.email === dummyCredentials.email && formData.password === dummyCredentials.password) {
         // Create dummy user object
         const dummyUser = {
-          uid: 'ML51OlsMRcP9Ti2ruddkqldWbnk1',
-          email: 'mukesh6381952282@gmail.com',
-          displayName: 'Mukesh',
+          uid: 'IeRHUaPaS6dLMVpNfqtE32qJIpS2',
+          email: 'abishekramesh2005@gmail.com',
+          displayName: 'Abishek',
           photoURL: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
         };
         
