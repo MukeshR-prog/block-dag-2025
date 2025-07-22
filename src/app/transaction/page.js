@@ -1,11 +1,15 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransaction } from '@/hooks/useTransaction';
+import useAuthStore from '../../store/authStore'; // ✅ Import auth store
+import api from '../../lib/axios'; // ✅ Import API
 import Notification from '../components/Notification';
 
 export default function TransactionPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user } = useAuthStore(); // ✅ Get user from auth store
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
     const [isPaying, setIsPaying] = useState(false);
     const [notification, setNotification] = useState({ isOpen: false, type: '', message: '' });
@@ -14,6 +18,24 @@ export default function TransactionPage() {
     const [transactionStatus, setTransactionStatus] = useState(null);
     const [recipient, setRecipient] = useState("");
     const [amount, setAmount] = useState("");
+    
+    // ✅ Get card_id from URL params with better error handling
+    const card_id = searchParams.get('card_id');
+    
+    // ✅ Transaction details state
+    const [transactionDescription, setTransactionDescription] = useState("");
+    const [transactionAddress, setTransactionAddress] = useState("");
+    
+    // ✅ Validate required data
+    useEffect(() => {
+        if (!user) {
+            console.warn("No user found in auth store");
+        }
+        if (!card_id) {
+            console.warn("No card_id found in URL parameters");
+        }
+        console.log("Transaction page initialized:", { user: user?.uid, card_id });
+    }, [user, card_id]);
     // Handler to add BlockDAG Primordial Testnet to MetaMask
     const handleAddBlockDAGNetwork = async () => {
         setMmStatus("");
@@ -27,7 +49,7 @@ export default function TransactionPage() {
                 method: "wallet_addEthereumChain",
                 params: [
                     {
-                        chainId: "0x413", // 1043 in hex
+                        chainId: "1043", // 1043 in hex
                         chainName: "Primordial BlockDAG Testnet",
                         rpcUrls: ["https://rpc.primordial.bdagscan.com"],
                         nativeCurrency: {
@@ -42,6 +64,53 @@ export default function TransactionPage() {
             setMmStatus("BlockDAG Testnet added to MetaMask!");
         } catch (err) {
             setMmError(err.message || "Failed to add network.");
+        }
+    };
+
+    // ✅ Function to save transaction to backend
+    const saveTransactionToBackend = async (txHash, sender) => {
+        try {
+            // ✅ Validate required data before sending
+            if (!user?.uid) {
+                throw new Error("User ID not found. Please log in again.");
+            }
+            if (!card_id) {
+                throw new Error("Card ID not found. Please select a card.");
+            }
+
+            const transactionData = {
+                user_id: user.uid,
+                card_id: card_id,
+                transaction_name: `BlockDAG Transfer to ${recipient.slice(0, 6)}...${recipient.slice(-4)}`,
+                description: transactionDescription || `Blockchain transfer of ${amount} BDAG`,
+                address: transactionAddress || recipient, // Use transaction address or recipient as fallback
+                status: true,
+                type: "debit", // Sending money is a debit
+                amount: Number(amount),
+                blockchain_hash: txHash,
+                recipient_address: recipient,
+                network: "BlockDAG Primordial Testnet"
+            };
+
+            console.log("Sending transaction data to backend:", transactionData);
+
+            const res = await api.post("/transactions", transactionData);
+            if (res.data.success) {
+                console.log("Transaction saved to backend successfully:", res.data.transaction);
+                setNotification({
+                    isOpen: true,
+                    type: 'success',
+                    message: 'Transaction saved to your account!'
+                });
+            }
+        } catch (err) {
+            console.error("Error saving transaction to backend:", err);
+            setNotification({
+                isOpen: true,
+                type: 'error',
+                message: `Backend save failed: ${err.message}`
+            });
+            // Don't fail the main transaction if backend save fails
         }
     };
 
@@ -75,6 +144,17 @@ export default function TransactionPage() {
                 setIsPaying(false);
                 return;
             }
+            if (!user?.uid) {
+                setNotification({ isOpen: true, type: 'error', message: 'Please log in to continue.' });
+                setIsPaying(false);
+                return;
+            }
+            if (!card_id) {
+                setNotification({ isOpen: true, type: 'error', message: 'Card ID not found. Please go back and select a card.' });
+                setIsPaying(false);
+                return;
+            }
+            
             // Get sender address (first account in MetaMask)
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             const sender = accounts[0];
@@ -91,6 +171,10 @@ export default function TransactionPage() {
                 method: 'eth_sendTransaction',
                 params: [txParams],
             });
+            
+            // ✅ Save transaction to backend after blockchain success
+            await saveTransactionToBackend(txHash, sender);
+            
             setTransactionStatus({ success: true, hash: txHash });
             setNotification({
                 isOpen: true,
@@ -163,21 +247,69 @@ export default function TransactionPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
                         />
                     </div>
+                    
+                    {/* ✅ New Description Field */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-black mb-1">Description (Optional)</label>
+                        <textarea
+                            value={transactionDescription}
+                            onChange={e => setTransactionDescription(e.target.value)}
+                            placeholder="Enter transaction description..."
+                            rows="2"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white resize-none"
+                        />
+                    </div>
+                    
+                    {/* ✅ New Address Field */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-black mb-1">Transaction Address (Optional)</label>
+                        <input
+                            type="text"
+                            value={transactionAddress}
+                            onChange={e => setTransactionAddress(e.target.value)}
+                            placeholder="Enter location or address for this transaction"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
+                        />
+                    </div>
                     <div className="bg-gray-50 p-4 rounded-md">
                         <h2 className="text-lg font-semibold mb-2 text-black">Payment Details</h2>
                         <div className="space-y-2 text-black">
                             <div className="flex justify-between">
                                 <span>Recipient:</span>
-                                <span className="font-mono break-all">{recipient || <span className="italic text-gray-400">Not entered</span>}</span>
+                                <span className="font-mono break-all text-sm">{recipient || <span className="italic text-gray-400">Not entered</span>}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Amount:</span>
                                 <span className="font-medium">{amount ? `${amount} BDAG` : <span className="italic text-gray-400">Not entered</span>}</span>
                             </div>
+                            {transactionDescription && (
+                                <div className="flex justify-between">
+                                    <span>Description:</span>
+                                    <span className="text-sm">{transactionDescription}</span>
+                                </div>
+                            )}
+                            {transactionAddress && (
+                                <div className="flex justify-between">
+                                    <span>Location:</span>
+                                    <span className="text-sm">{transactionAddress}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between">
                                 <span>Processing Fee:</span>
                                 <span className="font-medium">$1.50</span>
                             </div>
+                            {user && (
+                                <div className="flex justify-between">
+                                    <span>User:</span>
+                                    <span className="text-sm">{user.displayName || user.email}</span>
+                                </div>
+                            )}
+                            {card_id && (
+                                <div className="flex justify-between">
+                                    <span>Card ID:</span>
+                                    <span className="text-xs font-mono">{card_id}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
 

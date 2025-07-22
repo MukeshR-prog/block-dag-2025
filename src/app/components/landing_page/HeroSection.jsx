@@ -1,6 +1,10 @@
+import { useRouter } from "next/navigation";
 import React from "react";
 
-const HeroSection = () => (
+const HeroSection = () => {
+  const router = useRouter();
+
+  return (
   <section id="hero" className="w-full h-auto md:h-screen bg-white px-4 md:px-12 py-10 md:py-0 overflow-hidden flex flex-col md:flex-row items-center justify-center">
     
     {/* Left Content */}
@@ -52,6 +56,7 @@ const HeroSection = () => (
     <div className="flex-1 flex items-center justify-center mt-10 md:mt-0">
       <div className="w-[300px] sm:w-[400px] md:w-[600px] lg:w-[750px] aspect-square translate-x-0 md:translate-x-6">
         <img
+          onClick={() => router.push("/login")}
           src="/wallet.png"
           alt="Wallet UI"
           className="w-full h-full object-contain"
@@ -60,5 +65,5 @@ const HeroSection = () => (
     </div>
   </section>
 );
-
+}
 export default HeroSection;

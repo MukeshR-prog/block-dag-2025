@@ -264,6 +264,12 @@ const CardManager = ({ onMobileSidebarOpen }) => {
     router.push('/dashboard/add-card');
   };
 
+  // ✅ Add payment handler that passes card ID
+  const handlePaymentClick = (cardData) => {
+    console.log('Payment clicked for card:', cardData);
+    router.push(`/transaction?card_id=${cardData.id}`);
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
@@ -297,20 +303,76 @@ const CardManager = ({ onMobileSidebarOpen }) => {
             <Button variant="ghost" size="sm">
               <Bell className="h-5 w-5" />
             </Button>
-            <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
-              {user?.photoURL ? (
-                <img
-                  src={user?.photoURL}
-                  alt="User profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full bg-blue-600 flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">
-                    {user?.displayName?.[0] || '?'}
-                  </span>
+            {/* ✅ User Profile with Hover Tooltip */}
+            <div className="relative group">
+              <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 cursor-pointer transition-transform hover:scale-105">
+                {user?.photoURL ? (
+                  <img
+                    src={user?.photoURL}
+                    alt="User profile"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-blue-600 flex items-center justify-center">
+                    <span className="text-sm font-medium text-white">
+                      {user?.displayName?.[0] || '?'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* ✅ Hover Tooltip */}
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+                    {user?.photoURL ? (
+                      <img
+                        src={user?.photoURL}
+                        alt="User profile"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-blue-600 flex items-center justify-center">
+                        <span className="text-lg font-medium text-white">
+                          {user?.displayName?.[0] || '?'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">
+                      {user?.displayName || 'User'}
+                    </div>
+                    <div className="text-sm text-gray-500 truncate">
+                      {user?.email || 'No email available'}
+                    </div>
+                    {user?.uid && (
+                      <div className="text-xs text-gray-400 truncate mt-1">
+                        ID: {user.uid.slice(0, 8)}...{user.uid.slice(-4)}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+                
+                {/* ✅ Additional User Info */}
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Cards:</span>
+                      <span className="font-medium">{userCards.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className="text-green-600 font-medium">Active</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* ✅ Small Arrow Pointer */}
+                <div className="absolute top-0 right-4 transform -translate-y-1/2">
+                  <div className="w-2 h-2 bg-white border-l border-t border-gray-200 rotate-45"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -319,9 +381,9 @@ const CardManager = ({ onMobileSidebarOpen }) => {
         <div className="mt-4 flex items-center gap-2 text-sm text-blue-600">
           <MapPin className="h-4 w-4" />
           <span>Location services are enabled for smart card suggestions</span>
-          <Button variant="ghost" size="sm" className="ml-auto text-blue-600">
+          {/* <Button variant="ghost" size="sm" className="ml-auto text-blue-600">
             Manage
-          </Button>
+          </Button> */}
         </div>
 
         {/* Error Message */}
@@ -347,9 +409,9 @@ const CardManager = ({ onMobileSidebarOpen }) => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Smart Suggestions</h2>
-              <Button variant="ghost" size="sm">
+              {/* <Button variant="ghost" size="sm">
                 Customize
-              </Button>
+              </Button> */}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {smartSuggestions.map((suggestion, index) => (
@@ -385,10 +447,10 @@ const CardManager = ({ onMobileSidebarOpen }) => {
                 />
               </div>
               
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4" />
                 Filter
-              </Button>
+              </Button> */}
               
               <Button variant="primary" size="sm" onClick={handleAddCard}>
                 <Plus className="h-4 w-4" />
@@ -450,7 +512,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {/* User's Real Cards */}
               {filteredCards.map((card) => {
-                const isPaymentCard = ['credit', 'debit'].includes(card.type.toLowerCase());
+                // const isPaymentCard = ['credit', 'debit'].includes(card.type.toLowerCase());
                 
                 // if (isPaymentCard) {
                   return (
@@ -492,7 +554,7 @@ const CardManager = ({ onMobileSidebarOpen }) => {
 
               {/* Add New Card */}
               <Card 
-                className="p-6 border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[200px]"
+                className="p-6 border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[170px]"
                 onClick={handleAddCard}
               >
                 <Plus className="h-8 w-8 text-gray-400 mb-2" />

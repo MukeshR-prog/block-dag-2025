@@ -135,9 +135,9 @@ console.log("User in Navbar:", user);
       </div>
       
       {/* User Profile Section - Fixed at Bottom */}
-       <div className="flex-shrink-0 p-4 border-t border-gray-800 space-y-3">
+       <div className="flex-shrink-0 p-4 border-t border-gray-800 space-y-3 ">
         {/* User Profile Info */}
-        <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-gray-800  hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105 shadow-md hover:shadow-lg">
           <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
             {user?.photoURL ? (
               <img
@@ -153,14 +153,20 @@ console.log("User in Navbar:", user);
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.displayName || 'User'}</p>
-            <p className="text-xs text-gray-400 truncate">{user?.email || 'user@example.com'}</p>
+          <div className="flex-1 min-w-0 cursor-pointer" onClick={handleProfileClick} disabled={profileLoading}>
+            {profileLoading ? (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300 group-hover:border-white"></div> )
+            : (
+              <>
+                <p className="text-sm font-medium truncate">{user?.displayName || 'User'}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email || 'user@example.com'}</p>
+              </>
+            )}
           </div>
         </div>
         
         {/* Profile Button */}
-        <button
+        {/* <button
           onClick={handleProfileClick}
           disabled={profileLoading}
           className="w-full flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 cursor-pointer group hover:transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
@@ -171,7 +177,7 @@ console.log("User in Navbar:", user);
             <User className="h-5 w-5 group-hover:text-white" />
           )}
           <span className="truncate">Profile</span>
-        </button>
+        </button> */}
         
         {/* Logout Button */}
         <button
