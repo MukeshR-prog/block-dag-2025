@@ -12,7 +12,7 @@ const SmartSuggestions = ({
   actionText,
   onAction,
 }) => (
-  <Card className="p-6 rounded-2xl shadow-xl border-0 bg-gradient-to-r from-[#f7fafc] via-[#e3e8ee] to-[#cfd8dc] cursor-pointer transition-transform hover:scale-[1.03]">
+  <Card className="p-6 rounded-2xl shadow-xl border-0 bg-gradient-to-r from-[#f7fafc] via-[#e3e8ee] to-[#cfd8dc] cursor-pointer transition-transform hover:scale-[1.03] onClick={onAction}">
     <div className="flex items-center gap-6">
       <div className="p-4 rounded-xl bg-gradient-to-br from-blue-400 via-purple-300 to-pink-200 flex items-center justify-center shadow">
         <Icon className="h-9 w-9 text-white drop-shadow" />
