@@ -22,7 +22,7 @@ const HeroSection = () => {
         <button className="bg-sky-600 text-white px-6 py-2 rounded-full shadow hover:bg-sky-700 transition">
           Download App
         </button>
-        <button className="border border-sky-600 text-sky-600 px-6 py-2 rounded-full hover:bg-sky-50 transition">
+        <button className="border border-sky-600 text-sky-600 px-6 py-2 rounded-full hover:bg-sky-50 transition" onClick={() => window.open('https://www.youtube.com/watch?v=_owJDHAZWE4', '_blank')}>
           Watch Demo
         </button>
       </div>
